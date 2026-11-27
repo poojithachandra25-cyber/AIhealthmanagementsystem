@@ -1,0 +1,99 @@
+<section class="dash-kpis">
+  <div class="dash-card kpi">
+    <span><mat-icon>paid</mat-icon>Total paid</span>
+    <strong>{{ money(totals().paid) }}</strong>
+    <small>Successful payments, incl. GST</small>
+  </div>
+  <div class="dash-card kpi">
+    <span><mat-icon>pending_actions</mat-icon>Amount due</span>
+    <strong>{{ money(totals().due) }}</strong>
+    <small>{{ totals().dueCount }} bill{{ totals().dueCount === 1 ? '' : 's' }} to pay</small>
+  </div>
+  <div class="dash-card kpi">
+    <span><mat-icon>error_outline</mat-icon>Failed payments</span>
+    <strong>{{ totals().failed }}</strong>
+    <small>{{ totals().failed ? 'See the reason in the list below' : 'None' }}</small>
+  </div>
+  <div class="dash-card kpi">
+    <span><mat-icon>receipt_long</mat-icon>Invoices</span>
+    <strong>{{ store.bills().length }}</strong>
+    <small>One per appointment</small>
+  </div>
+</section>
+
+<div class="dash-card">
+  <div class="dash-card-head">
+    <div>
+      <h2>Billing &amp; payments</h2>
+      <small>Consultation fees with GST, and the status of each payment.</small>
+    </div>
+    <div class="segmented" role="tablist" aria-label="Filter by status">
+      @for (f of filters; track f.id) {
+        <button type="button" role="tab" [class.active]="filter() === f.id" (click)="filter.set(f.id)">
+          {{ f.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="dash-table-wrap">
+    <table class="dash-table">
+      <thead>
+        <tr>
+          <th>Invoice</th>
+          <th>Doctor</th>
+          <th>Visit</th>
+          <th>Fee + GST</th>
+          <th>Total</th>
+          <th>Payment</th>
+          <th><span class="sr-only">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (b of shown(); track b.id) {
+          <tr>
+            <td>
+              <strong class="inv">{{ b.invoiceNo }}</strong>
+              <small>{{ b.type === 'emergency' ? 'Emergency' : 'Regular' }}</small>
+            </td>
+            <td>
+              <span class="doc">{{ b.doctor }}</span>
+              <small>{{ b.department }}</small>
+            </td>
+            <td>{{ fullDate(b.date) }} · {{ timeLabel(b.time) }}</td>
+            <td class="muted">{{ money(b.fee) }} + {{ money(b.gst) }}</td>
+            <td><strong>{{ money(b.total) }}</strong></td>
+            <td>
+              <span class="status-pill" [class]="statusMeta[b.status].css">{{ statusMeta[b.status].label }}</span>
+              @if (b.methodDetail) {
+                <small>{{ b.methodDetail }}</small>
+              }
+              @if (b.status === 'failed' && b.failureReason) {
+                <small class="why">{{ b.failureReason }}</small>
+              }
+            </td>
+            <td>
+              <div class="actions">
+                <button type="button" (click)="invoice(b)" [attr.aria-label]="'Download invoice ' + b.invoiceNo">
+                  <mat-icon>download</mat-icon>Invoice
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="empty">
+              {{ store.bills().length ? 'No bills with this status.' : 'No bills yet. Bills appear here when you book an appointment.' }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<p class="sample-note">
+  <mat-icon>info_outline</mat-icon>
+  Payments use a demo gateway. No real money is charged. Paid bills for cancelled appointments
+  are marked Refunded.
+</p>

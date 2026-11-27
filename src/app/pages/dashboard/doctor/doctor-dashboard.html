@@ -1,0 +1,138 @@
+@if (store.loading() && !store.profile()) {
+  <div class="dash-card state"><mat-spinner diameter="28" /> Loading your schedule…</div>
+} @else if (store.notLinked()) {
+  <div class="dash-card link-card">
+    <span class="link-icon"><mat-icon>link</mat-icon></span>
+    <h2>Your doctor profile isn't set up yet</h2>
+    <p>
+      Accounts are linked to the doctor profile the hospital admin registered with the same email.
+      No profile uses <strong>{{ email() }}</strong> yet. Ask the admin to add you (Admin → Doctors) with this
+      email, then check again.
+    </p>
+    <button type="button" class="primary" [disabled]="store.loading()" (click)="store.load()">
+      {{ store.loading() ? 'Checking…' : 'Check again' }}
+    </button>
+  </div>
+} @else if (store.error()) {
+  <div class="dash-card state">
+    {{ store.error() }}
+    <button type="button" class="dash-link" (click)="store.load()">Try again</button>
+  </div>
+} @else {
+  @switch (current()) {
+    @case ('myappointments') {
+      <app-doctor-appointments />
+    }
+    @case ('patients') {
+      <app-doctor-patients />
+    }
+    @case ('availability') {
+      <app-doctor-availability />
+    }
+    @case ('profile') {
+      <app-doctor-profile />
+    }
+    @default {
+      <section class="dash-kpis">
+        @for (kpi of kpis(); track kpi.label) {
+          <div class="dash-card kpi">
+            <span><mat-icon>{{ kpi.icon }}</mat-icon>{{ kpi.label }}</span>
+            <strong>{{ kpi.value }}</strong>
+            <small>{{ kpi.note }}</small>
+          </div>
+        }
+      </section>
+
+      @if (store.needOutcome().length) {
+        <a class="alert" routerLink="/dashboard" [queryParams]="{ view: 'myappointments' }">
+          <mat-icon>pending_actions</mat-icon>
+          {{ store.needOutcome().length }} past visit{{ store.needOutcome().length === 1 ? '' : 's' }} still
+          need an outcome. Mark them completed or missed in My Appointments.
+          <mat-icon class="go">arrow_forward</mat-icon>
+        </a>
+      }
+
+      <section class="row">
+        <div class="dash-card">
+          <div class="dash-card-head">
+            <h2>Today's schedule</h2>
+            <a class="dash-link" routerLink="/dashboard" [queryParams]="{ view: 'myappointments' }">All appointments</a>
+          </div>
+          <div class="dash-table-wrap">
+            <table class="dash-table">
+              <thead><tr><th>Time</th><th>Patient</th><th>Reason</th><th>Status</th><th><span class="sr-only">Actions</span></th></tr></thead>
+              <tbody>
+                @for (a of store.todays(); track a.id) {
+                  <tr>
+                    <td>{{ timeLabel(a.time) }}</td>
+                    <td>
+                      <strong>{{ a.patient }}</strong>
+                      <small class="sub">{{ patientMeta(a.patientDob, a.patientGender) }}</small>
+                    </td>
+                    <td class="reason">{{ a.reason || '—' }}</td>
+                    <td><span class="status-pill" [class]="a.status">{{ a.status }}</span></td>
+                    <td>
+                      <div class="actions">
+                        <button type="button" (click)="store.openCase(a.id, 'view')">View</button>
+                        <button type="button" class="update" [disabled]="a.status === 'cancelled'" (click)="store.openCase(a.id, 'update')">Update</button>
+                      </div>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="5" class="muted">No appointments today.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="side">
+          <div class="dash-card">
+            <div class="dash-card-head">
+              <h2>Pending requests</h2>
+              <a class="dash-link" routerLink="/dashboard" [queryParams]="{ view: 'patients' }">Patients</a>
+            </div>
+            @for (a of store.requests().slice(0, 4); track a.id) {
+              <div class="list-row">
+                <div>
+                  <strong>{{ a.patient }}</strong>
+                  <small>{{ fullDate(a.date) }} · {{ timeLabel(a.time) }}{{ a.type === 'emergency' ? ' · Emergency' : '' }}</small>
+                </div>
+                <div class="actions">
+                  <button type="button" class="ok" [disabled]="store.busy() === a.id" (click)="store.setStatus(a, 'confirmed')">Confirm</button>
+                  <button type="button" class="no" [disabled]="store.busy() === a.id" (click)="store.setStatus(a, 'cancelled')">Cancel</button>
+                </div>
+              </div>
+            } @empty {
+              <p class="muted"><mat-icon>verified</mat-icon> No requests waiting.</p>
+            }
+          </div>
+
+          @if (store.profile(); as p) {
+            <div class="dash-card profile" [style.--accent-1]="p.accentFrom" [style.--accent-2]="p.accentTo">
+              <div class="who">
+                @if (p.image && !photoFailed()) {
+                  <img [src]="p.image" [alt]="p.name" (error)="photoFailed.set(true)" />
+                } @else {
+                  <span class="photo">{{ initials(p.name) }}</span>
+                }
+                <div>
+                  <span class="dept">{{ p.department }}</span>
+                  <h2>{{ p.name }}</h2>
+                  <small>{{ p.qualifications || p.title }}</small>
+                </div>
+              </div>
+              <div class="week">
+                @for (name of days; track $index) {
+                  <span [class.on]="works($index)">{{ name }}</span>
+                }
+              </div>
+              <span class="hours"><mat-icon>schedule</mat-icon>{{ consulting() }}</span>
+              <a class="dash-link" routerLink="/dashboard" [queryParams]="{ view: 'availability' }">Edit availability</a>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+}

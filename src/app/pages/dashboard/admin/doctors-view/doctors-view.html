@@ -1,0 +1,95 @@
+<div class="dash-card">
+  <div class="dash-card-head">
+    <div>
+      <h2>Doctors</h2>
+      <small>
+        {{ doctors().length }} doctors · {{ awaiting() }} still to create their account.
+      </small>
+    </div>
+    <button type="button" class="add" (click)="openAdd()"><mat-icon>person_add</mat-icon>Add doctor</button>
+  </div>
+
+  <div class="toolbar">
+    <label class="search">
+      <mat-icon>search</mat-icon>
+      <input type="search" placeholder="Search name, email or qualification" aria-label="Search doctors"
+        [value]="query()" (input)="query.set($any($event.target).value)" />
+    </label>
+    <select aria-label="Filter by department" [value]="dept()" (change)="dept.set(+$any($event.target).value)">
+      <option [value]="0">All departments</option>
+      @for (d of departments(); track d.id) {
+        <option [value]="d.id">{{ d.name }}</option>
+      }
+    </select>
+  </div>
+
+  @if (loading()) {
+    <div class="state"><mat-spinner diameter="24" /> Loading doctors…</div>
+  } @else if (error()) {
+    <div class="state">{{ error() }} <button type="button" class="dash-link" (click)="load()">Try again</button></div>
+  } @else {
+    <div class="dash-table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>Doctor</th>
+            <th>Department</th>
+            <th>Designation</th>
+            <th>Qualifications</th>
+            <th>Exp.</th>
+            <th>Email</th>
+            <th>Account</th>
+            <th><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (d of shown(); track d.id) {
+              <tr>
+                <td>
+                  <div class="who">
+                    @if (d.image && !brokenPhotos().has(d.id)) {
+                      <img [src]="d.image" [alt]="d.name" loading="lazy" (error)="photoFailed(d.id)" />
+                    } @else {
+                      <span class="photo">{{ initials(d.name) }}</span>
+                    }
+                    <div>
+                      <strong>{{ d.name }}</strong>
+                      <small>{{ d.registrationNo || 'No registration no.' }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ d.department }}</td>
+                <td>{{ d.title }}</td>
+                <td class="wrap">{{ d.qualifications || '—' }}</td>
+                <td>{{ d.experience }} yrs</td>
+                <td>{{ d.email || '—' }}</td>
+                <td>
+                  @if (d.hasAccount) {
+                    <span class="status-pill paid">Active</span>
+                  } @else if (d.email) {
+                    <span class="status-pill pending">Awaiting sign-up</span>
+                  } @else {
+                    <span class="status-pill cancelled">No email</span>
+                  }
+                  <small class="note" [title]="dayList(d)">{{ d.appointments }} appts · {{ dayList(d) }}</small>
+                </td>
+                <td>
+                  <div class="actions">
+                    <button type="button" (click)="edit(d)"><mat-icon>edit</mat-icon>Edit</button>
+                  </div>
+                </td>
+              </tr>
+          } @empty {
+            <tr><td colspan="8" class="none">No doctors match.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<p class="sample-note">
+  <mat-icon>info_outline</mat-icon>
+  Doctors without an account show "Awaiting sign-up": they become active when they sign up as a doctor with the
+  email listed here.
+</p>

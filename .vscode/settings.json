@@ -1,0 +1,6 @@
+{
+  // CLAUDE.md is protected (see .claude/hooks/protectfiles.md): VS Code opens it read-only.
+  "files.readonlyInclude": {
+    "CLAUDE.md": true
+  }
+}

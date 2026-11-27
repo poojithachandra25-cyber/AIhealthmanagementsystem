@@ -1,0 +1,82 @@
+<div class="page-shell">
+  <section class="page-banner">
+    <span class="eyebrow">Contact</span>
+    <h1>We're here to <span>help</span></h1>
+    <p>Questions about appointments, billing or our services? Reach out and our team will respond quickly.</p>
+  </section>
+
+  <section class="section contact-layout">
+    <div class="contact-info">
+      @for (contact of contacts; track contact.label) {
+        <div class="contact-item">
+          <span class="icon-tile"><mat-icon>{{ contact.icon }}</mat-icon></span>
+          <div>
+            <span>{{ contact.label }}</span>
+            <strong>{{ contact.value }}</strong>
+          </div>
+        </div>
+      }
+
+      <div class="hours-card">
+        <h3><mat-icon>schedule</mat-icon> Visiting hours</h3>
+        @for (row of hours; track row.day) {
+          <div class="hours-row">
+            <span>{{ row.day }}</span>
+            <strong>{{ row.time }}</strong>
+          </div>
+        }
+      </div>
+    </div>
+
+    <form class="form-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <h2>Send us a message</h2>
+      <p>We usually reply within one business day.</p>
+
+      <div class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Full name</mat-label>
+          <input matInput formControlName="name" autocomplete="name" />
+          <mat-icon matPrefix>person</mat-icon>
+          @if (form.controls.name.hasError('required')) {
+            <mat-error>Name is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="email" />
+          <mat-icon matPrefix>mail</mat-icon>
+          @if (form.controls.email.hasError('required')) {
+            <mat-error>Email is required</mat-error>
+          } @else if (form.controls.email.hasError('email')) {
+            <mat-error>Enter a valid email</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Subject</mat-label>
+          <input matInput formControlName="subject" />
+          <mat-icon matPrefix>subject</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Message</mat-label>
+          <textarea matInput rows="5" formControlName="message"></textarea>
+          @if (form.controls.message.hasError('required')) {
+            <mat-error>Message is required</mat-error>
+          } @else if (form.controls.message.hasError('minlength')) {
+            <mat-error>Please write at least 10 characters</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <button mat-flat-button class="pill-button full-width" type="submit" [disabled]="sending()">
+        @if (sending()) {
+          <mat-spinner diameter="20" />
+        } @else {
+          Send message
+        }
+      </button>
+    </form>
+  </section>
+</div>

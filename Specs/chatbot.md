@@ -1,0 +1,3 @@
+-- Add chatbot for the website.
+-- If possible use any mcp server to use chatbot for the website.
+-- It should answer all the questions according to the website we built.

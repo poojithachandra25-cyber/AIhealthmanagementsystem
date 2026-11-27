@@ -1,0 +1,106 @@
+<form class="form" (submit)="$event.preventDefault(); save(false)" novalidate>
+  <label class="field wide">
+    <span>Diagnosis</span>
+    <input
+      [class.invalid]="touched() && !diagnosis().trim()"
+      maxlength="255"
+      placeholder="e.g. Viral fever"
+      [value]="diagnosis()"
+      (input)="diagnosis.set($any($event.target).value)"
+    />
+    @if (touched() && !diagnosis().trim()) {
+      <small class="error">Enter a diagnosis</small>
+    }
+  </label>
+
+  <label class="field">
+    <span>Blood pressure</span>
+    <input maxlength="15" placeholder="120/80" [value]="bloodPressure()" (input)="bloodPressure.set($any($event.target).value)" />
+  </label>
+  <label class="field">
+    <span>Pulse</span>
+    <input maxlength="15" placeholder="78 bpm" [value]="pulse()" (input)="pulse.set($any($event.target).value)" />
+  </label>
+  <label class="field">
+    <span>Temperature</span>
+    <input maxlength="15" placeholder="98.6 F" [value]="temperature()" (input)="temperature.set($any($event.target).value)" />
+  </label>
+  <label class="field">
+    <span>Weight</span>
+    <input maxlength="15" placeholder="70 kg" [value]="weight()" (input)="weight.set($any($event.target).value)" />
+  </label>
+
+  <div class="wide">
+    <span class="label">Medicines</span>
+    <div class="meds">
+      <div class="meds-head" aria-hidden="true">
+        <span>Name</span><span>Dosage</span><span>Frequency</span><span>Duration</span><span></span>
+      </div>
+      @for (m of medicines(); track $index; let i = $index) {
+        <div class="med">
+          <input aria-label="Medicine name" maxlength="120" placeholder="Medicine" [value]="m.name" (input)="setMedicine(i, 'name', $any($event.target).value)" />
+          <input aria-label="Dosage" maxlength="60" placeholder="1 tab" [value]="m.dosage" (input)="setMedicine(i, 'dosage', $any($event.target).value)" />
+          <input aria-label="Frequency" maxlength="60" placeholder="Twice/day" [value]="m.frequency" (input)="setMedicine(i, 'frequency', $any($event.target).value)" />
+          <input aria-label="Duration" maxlength="60" placeholder="3 days" [value]="m.duration" (input)="setMedicine(i, 'duration', $any($event.target).value)" />
+          <button type="button" class="remove" aria-label="Remove medicine" (click)="removeMedicine(i)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+    </div>
+    <button type="button" class="add-med" (click)="addMedicine()"><mat-icon>add</mat-icon>Add medicine</button>
+  </div>
+
+  <label class="field wide">
+    <span>Advice <small>(optional)</small></span>
+    <textarea
+      rows="3"
+      maxlength="2000"
+      placeholder="Rest, fluids, follow up if not improving"
+      [value]="advice()"
+      (input)="advice.set($any($event.target).value)"
+    ></textarea>
+  </label>
+
+  <div class="wide">
+    <span class="label">Tests to undergo <small>(suggested in the advice)</small></span>
+    <div class="chips" role="group" aria-label="Suggested tests">
+      @for (t of suggestions; track t) {
+        <button type="button" [class.on]="tests().includes(t)" [attr.aria-pressed]="tests().includes(t)" (click)="toggleTest(t)">
+          @if (tests().includes(t)) {
+            <mat-icon>check</mat-icon>
+          }
+          {{ t }}
+        </button>
+      }
+      @for (t of extraTests(); track t) {
+        <button type="button" class="on" aria-pressed="true" (click)="toggleTest(t)"><mat-icon>check</mat-icon>{{ t }}</button>
+      }
+    </div>
+    <div class="custom">
+      <input
+        maxlength="60"
+        placeholder="Another test…"
+        aria-label="Add another test"
+        [value]="customTest()"
+        (input)="customTest.set($any($event.target).value)"
+        (keydown.enter)="$event.preventDefault(); addCustomTest()"
+      />
+      <button type="button" (click)="addCustomTest()" [disabled]="!customTest().trim()">Add</button>
+    </div>
+  </div>
+
+  <div class="actions wide">
+    <small>Saving updates the patient's Medical Records.</small>
+    <button mat-stroked-button type="submit" [disabled]="saving()">Save prescription</button>
+    @if (canComplete()) {
+      <button mat-flat-button type="button" [disabled]="saving()" (click)="save(true)">
+        @if (saving()) {
+          <mat-spinner diameter="18" />
+        } @else {
+          <ng-container><mat-icon>task_alt</mat-icon> Save &amp; mark completed</ng-container>
+        }
+      </button>
+    }
+  </div>
+</form>

@@ -1,0 +1,57 @@
+<div class="dash-card">
+  <div class="dash-card-head">
+    <div>
+      <h2>Medical records</h2>
+      <small>Prescriptions, lab reports, diagnoses and advice added by your doctors.</small>
+    </div>
+    <small>{{ store.records().length }} total</small>
+  </div>
+
+  <div class="filters" role="tablist" aria-label="Filter records">
+    @for (f of filters; track f) {
+      <button type="button" role="tab" [class.active]="filter() === f" (click)="filter.set(f)">
+        {{ label(f) }} <span>{{ counts()[f] ?? 0 }}</span>
+      </button>
+    }
+  </div>
+
+  <div class="grid">
+    @for (r of shown(); track r.id) {
+      <article class="record" [class]="r.type">
+        <div class="top">
+          <span class="icon"><mat-icon>{{ meta[r.type].icon }}</mat-icon></span>
+          <div>
+            <span class="kind">{{ meta[r.type].label }}</span>
+            <h3>{{ r.title }}</h3>
+          </div>
+        </div>
+        @if (r.details) {
+          <p>{{ r.details }}</p>
+        }
+        <div class="foot">
+          <small><mat-icon>person</mat-icon>{{ r.doctor }} · {{ r.department }}</small>
+          <small><mat-icon>event</mat-icon>{{ fullDate(r.date) }}</small>
+        </div>
+        @if (r.fileName) {
+          <button type="button" class="download" (click)="view(r)">
+            <mat-icon>visibility</mat-icon>View report
+          </button>
+        }
+        @if (canDownload(r)) {
+          <button type="button" class="download" [disabled]="downloading() === r.id" (click)="download(r)">
+            <mat-icon>download</mat-icon>
+            {{ downloading() === r.id ? 'Preparing…' : 'Download PDF' }}
+          </button>
+        }
+      </article>
+    } @empty {
+      <p class="empty">
+        <mat-icon>folder_open</mat-icon>
+        {{ store.records().length ? 'No records of this type.' : 'No medical records yet. Records your doctor adds after a confirmed visit appear here.' }}
+      </p>
+    }
+  </div>
+</div>
+
+<!-- Lab reports the patient uploads; doctors see them under View / Update → Reports. -->
+<app-report-uploads />

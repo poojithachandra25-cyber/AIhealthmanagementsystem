@@ -1,0 +1,86 @@
+:host {
+  display: grid;
+  gap: 18px;
+}
+
+.kpi > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--dash-accent);
+  }
+}
+
+.segmented {
+  flex-wrap: wrap;
+}
+
+td small {
+  display: block;
+  margin-top: 2px;
+  color: var(--mp-muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.inv {
+  font-family: Consolas, 'Cascadia Code', monospace;
+  font-size: 0.8rem;
+}
+
+.doc {
+  color: var(--mp-ink);
+  font-weight: 700;
+}
+
+.muted {
+  color: var(--mp-muted);
+  font-size: 0.8rem;
+}
+
+.why {
+  max-width: 200px;
+  color: #b91c1c !important;
+  white-space: normal;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border: 1px solid var(--dash-line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--mp-ink-soft);
+    font: inherit;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--dash-accent);
+      color: var(--dash-accent);
+    }
+  }
+  mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+  }
+}
+
+.empty {
+  color: var(--mp-muted) !important;
+  font-weight: 500 !important;
+  white-space: normal !important;
+}

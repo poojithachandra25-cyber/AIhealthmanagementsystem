@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Code Improver Report</title>
+<style>
+  :root {
+    --bg: #f4f7fb;
+    --card: #ffffff;
+    --ink: #0f1f33;
+    --muted: #5b6b80;
+    --line: #dde5ef;
+    --navy: #0f2a4a;
+    --accent: #2a78d6;
+    --code-bg: #f6f8fa;
+    --bad: #b42318;
+    --bad-bg: #fdecea;
+    --good: #067647;
+    --good-bg: #e7f6ee;
+    --high: #b42318;
+    --medium: #b54708;
+    --low: #475467;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --bg: #0b1320;
+      --card: #121c2c;
+      --ink: #e6edf6;
+      --muted: #9aa9bc;
+      --line: #24324a;
+      --navy: #0a1a2e;
+      --accent: #6aa8f0;
+      --code-bg: #0d1625;
+      --bad: #f97066;
+      --bad-bg: #3a1714;
+      --good: #47cd89;
+      --good-bg: #0f2e20;
+      --high: #f97066;
+      --medium: #fdb022;
+      --low: #a6b4c8;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.6 'Segoe UI', Manrope, system-ui, sans-serif;
+  }
+  header {
+    background: var(--navy);
+    color: #fff;
+    padding: 28px 16px;
+  }
+  header .wrap, main { max-width: 1080px; margin: 0 auto; }
+  header h1 { margin: 0 0 4px; font-size: 1.6rem; }
+  header p { margin: 0; color: #c7d4e6; }
+  main { padding: 24px 16px 48px; }
+  .scan {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 28px;
+  }
+  .scan > h2 { margin: 0 0 4px; font-size: 1.25rem; }
+  .meta { color: var(--muted); font-size: 0.85rem; margin: 0 0 12px; }
+  .counts { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .counts span {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 2px 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .issue {
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--low);
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 16px;
+  }
+  .issue.high { border-left-color: var(--high); }
+  .issue.medium { border-left-color: var(--medium); }
+  .issue.bug { border-left-color: var(--bad); }
+  .issue h3 { margin: 0 0 6px; font-size: 1.05rem; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .tag {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 1px 8px;
+    border-radius: 6px;
+    background: var(--code-bg);
+    border: 1px solid var(--line);
+  }
+  .tag.high, .tag.bug { color: var(--high); }
+  .tag.medium { color: var(--medium); }
+  .tag.low { color: var(--low); }
+  .where { font-family: Consolas, 'Cascadia Code', monospace; font-size: 0.85rem; color: var(--accent); }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+  @media (max-width: 760px) { .compare { grid-template-columns: 1fr; } }
+  .compare figure { margin: 0; min-width: 0; }
+  .compare figcaption {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 8px 8px 0 0;
+  }
+  .before figcaption { background: var(--bad-bg); color: var(--bad); }
+  .after figcaption { background: var(--good-bg); color: var(--good); }
+  pre {
+    margin: 0;
+    padding: 12px;
+    overflow-x: auto;
+    background: var(--code-bg);
+    border: 1px solid var(--line);
+    border-radius: 0 0 8px 8px;
+    font: 0.82rem/1.5 Consolas, 'Cascadia Code', monospace;
+  }
+  .label { font-weight: 700; }
+  p { margin: 6px 0; }
+  .good-list { margin: 8px 0 0; padding-left: 20px; }
+  .empty { color: var(--muted); text-align: center; padding: 40px 16px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Code Improver Report</h1>
+    <p>MedPoint: readability, performance and best-practice suggestions from the code-improver sub-agent. Newest scan first.</p>
+  </div>
+</header>
+<main>
+<!-- SCANS:START (code-improver inserts each new scan directly below this line) -->
+<p class="empty" id="no-scans">No scans yet. Ask Claude Code: “Use code-improver on server/src/routes/”.</p>
+<!-- SCANS:END -->
+</main>
+</body>
+</html>

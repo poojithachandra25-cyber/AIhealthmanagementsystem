@@ -1,0 +1,65 @@
+<div class="page-shell">
+  <section class="hero">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <div class="hero-copy">
+      <span class="eyebrow">Our departments</span>
+      <h1>Centres of <span>excellence</span>, built around you</h1>
+      <p>
+        Six specialist departments, one connected team. Find the right expert and book your visit
+        in minutes.
+      </p>
+
+      <label class="search">
+        <mat-icon>search</mat-icon>
+        <input
+          type="search"
+          placeholder="Search a department, service or doctor…"
+          aria-label="Search departments, services or doctors"
+          [value]="query()"
+          (input)="onSearch($event)"
+        />
+        @if (query()) {
+          <button type="button" aria-label="Clear search" (click)="query.set('')">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </label>
+    </div>
+
+    <dl class="hero-stats">
+      <div><dt>Departments</dt><dd>{{ departments.length }}</dd></div>
+      <div><dt>Specialists</dt><dd>{{ doctorCount }}</dd></div>
+      <div><dt>Emergency</dt><dd>24/7</dd></div>
+    </dl>
+  </section>
+
+  <section class="section">
+    @if (filtered().length) {
+      <div class="grid">
+        @for (dept of filtered(); track dept.slug) {
+          <app-dept-card [dept]="dept" />
+        }
+      </div>
+    } @else {
+      <div class="empty">
+        <mat-icon>search_off</mat-icon>
+        <p>No departments match “{{ query() }}”.</p>
+        <button mat-stroked-button class="pill-button" (click)="query.set('')">Show all</button>
+      </div>
+    }
+  </section>
+
+  <section class="section">
+    <div class="help-band">
+      <div>
+        <h2>Not sure which department you need?</h2>
+        <p>Our care team will guide you to the right specialist.</p>
+      </div>
+      <a mat-flat-button class="pill-button" routerLink="/contact">
+        <mat-icon>support_agent</mat-icon>
+        Talk to us
+      </a>
+    </div>
+  </section>
+</div>

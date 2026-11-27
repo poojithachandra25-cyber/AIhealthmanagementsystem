@@ -1,0 +1,83 @@
+<div class="dash-card">
+  <div class="dash-card-head">
+    <div>
+      <h2>Patients</h2>
+      <small>
+        {{ totals().patients }} patient{{ totals().patients === 1 ? '' : 's' }} · {{ totals().appointments }}
+        appointments · {{ totals().active }} with upcoming visits
+      </small>
+    </div>
+    <label class="search">
+      <mat-icon>search</mat-icon>
+      <input type="search" placeholder="Search patient, email or doctor" aria-label="Search patients"
+        [value]="query()" (input)="query.set($any($event.target).value)" />
+    </label>
+  </div>
+
+  @if (loading()) {
+    <div class="state"><mat-spinner diameter="24" /> Loading patients…</div>
+  } @else if (error()) {
+    <div class="state">{{ error() }} <button type="button" class="dash-link" (click)="load()">Try again</button></div>
+  } @else {
+    <div class="dash-table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Doctor</th>
+            <th>Department</th>
+            <th>Date &amp; time</th>
+            <th>Type</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Payment</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of rows(); track r.p.id + '-' + (r.a?.id ?? 0)) {
+            <tr [class.group-start]="r.first">
+              @if (r.first) {
+                <td [attr.rowspan]="r.span" class="patient">
+                  <div class="who">
+                    <span class="avatar">{{ initials(r.p.name) }}</span>
+                    <div>
+                      <strong>{{ r.p.name }}</strong>
+                      <small>
+                        {{ patientCode(r.p.id) }}{{ patientMeta(r.p.dateOfBirth, r.p.gender) ? ' · ' + patientMeta(r.p.dateOfBirth, r.p.gender) : '' }}{{ r.p.bloodGroup ? ' · ' + r.p.bloodGroup : '' }}
+                      </small>
+                      <small>Joined {{ joined(r.p.createdAt) }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td [attr.rowspan]="r.span" class="patient email">
+                  <a [href]="'mailto:' + r.p.email">{{ r.p.email }}</a>
+                </td>
+                <td [attr.rowspan]="r.span" class="patient">{{ r.p.phone || '—' }}</td>
+              }
+              @if (r.a; as a) {
+                <td class="doc">{{ a.doctor }}</td>
+                <td>{{ a.department }}</td>
+                <td>{{ fullDate(a.date) }} · {{ timeLabel(a.time) }}</td>
+                <td class="cap">{{ a.type }}</td>
+                <td class="reason" [title]="a.reason ?? ''">{{ a.reason || '—' }}</td>
+                <td><span class="status-pill" [class]="a.status">{{ a.status }}</span></td>
+                <td>
+                  @if (a.billStatus) {
+                    <span class="status-pill" [class]="billMeta[a.billStatus].css">{{ billMeta[a.billStatus].label }}</span>
+                    @if (a.billTotal !== null) { <small>{{ money(a.billTotal) }}</small> }
+                  } @else { — }
+                </td>
+              } @else {
+                <td colspan="7" class="none">No appointments yet.</td>
+              }
+            </tr>
+          } @empty {
+            <tr><td colspan="10" class="none">{{ patients().length ? 'No patients match.' : 'No patients have signed up yet.' }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -1,0 +1,113 @@
+@if (!isDashboard()) {
+<header class="site-header">
+  <div class="page-shell">
+    <mat-toolbar class="topbar">
+      <a class="brand" routerLink="/" aria-label="MedPoint home">
+        <span class="brand-mark"><mat-icon>add</mat-icon></span>
+        <span class="brand-name">Med<span>Point</span></span>
+      </a>
+
+      <nav class="nav-menu" aria-label="Main navigation">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+
+        <app-dept-dropdown />
+
+        <a routerLink="/contact" routerLinkActive="active">Contact</a>
+      </nav>
+
+      <div class="nav-actions">
+        @if (auth.user(); as user) {
+          <button mat-stroked-button class="user-button" [matMenuTriggerFor]="userMenu">
+            <mat-icon>account_circle</mat-icon>
+            <span class="user-name">{{ user.name }}</span>
+          </button>
+          <mat-menu #userMenu="matMenu" xPosition="before">
+            <div class="menu-header">
+              <strong>{{ user.name }}</strong>
+              <small>{{ user.role | titlecase }}</small>
+            </div>
+            <mat-divider />
+            <a mat-menu-item routerLink="/dashboard"><mat-icon>dashboard</mat-icon>Dashboard</a>
+            <button mat-menu-item (click)="logout()"><mat-icon>logout</mat-icon>Log out</button>
+          </mat-menu>
+        } @else {
+          <a mat-flat-button class="login-button" routerLink="/login">
+            <mat-icon>login</mat-icon>
+            Login
+          </a>
+        }
+
+        <button
+          mat-icon-button
+          class="menu-toggle"
+          [matMenuTriggerFor]="mobileMenu"
+          aria-label="Open navigation menu"
+        >
+          <mat-icon>menu</mat-icon>
+        </button>
+        <mat-menu #mobileMenu="matMenu" xPosition="before">
+          <a mat-menu-item routerLink="/"><mat-icon>home</mat-icon>Home</a>
+          <button mat-menu-item [matMenuTriggerFor]="mobileDeptMenu">
+            <mat-icon>apartment</mat-icon>Our Departments
+          </button>
+          <a mat-menu-item routerLink="/contact"><mat-icon>mail</mat-icon>Contact</a>
+        </mat-menu>
+        <mat-menu #mobileDeptMenu="matMenu">
+          <a mat-menu-item routerLink="/departments"><mat-icon>view_list</mat-icon>All departments</a>
+          <mat-divider />
+          @for (dept of departments; track dept.slug) {
+            <a mat-menu-item [routerLink]="['/departments', dept.slug]">
+              <mat-icon>{{ dept.icon }}</mat-icon>{{ dept.title }}
+            </a>
+          }
+        </mat-menu>
+      </div>
+    </mat-toolbar>
+  </div>
+</header>
+}
+
+<main>
+  <router-outlet />
+</main>
+
+@if (!isDashboard()) {
+<footer class="site-footer">
+  <div class="page-shell">
+    <div class="footer-brand">
+      <span class="brand-name light">Med<span>Point</span></span>
+      <p>Compassionate, connected care for every patient, every day.</p>
+    </div>
+    <div class="footer-links">
+      <div>
+        <h4>Quick links</h4>
+        @for (link of navLinks; track link.path) {
+          <a [routerLink]="link.path">{{ link.label }}</a>
+        }
+      </div>
+      <div>
+        <h4>For you</h4>
+        <a routerLink="/login">Patient portal</a>
+        <a routerLink="/login">Doctor portal</a>
+        <a routerLink="/signup">Create an account</a>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p>+1 (800) 123-4567</p>
+        <p>support&#64;medpoint.com</p>
+        <p>123 Medical Road, City</p>
+      </div>
+    </div>
+    <div class="copyright-bar">
+      <span>© {{ year }} MedPoint. All rights reserved.</span>
+      <div class="footer-meta">
+        <a routerLink="/contact">Privacy</a>
+        <a routerLink="/contact">Terms</a>
+      </div>
+    </div>
+  </div>
+</footer>
+}
+
+<!-- Website chatbot: floating on every page, including the dashboards. -->
+<app-chatbot />

@@ -1,0 +1,148 @@
+:host {
+  display: grid;
+  gap: 18px;
+}
+
+.add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--dash-navy);
+  color: #fff;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--dash-accent);
+  }
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+
+  > select {
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid var(--dash-line);
+    border-radius: 10px;
+    background: #fff;
+    font: inherit;
+    font-size: 0.84rem;
+  }
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--dash-line);
+  border-radius: 10px;
+  color: var(--mp-muted);
+
+  input {
+    width: 260px;
+    border: 0;
+    outline: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.85rem;
+  }
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--mp-ink-soft);
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  img,
+  .photo {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    object-fit: cover;
+  }
+  .photo {
+    display: grid;
+    place-items: center;
+    background: var(--dash-accent-soft);
+    color: var(--dash-accent);
+    font-size: 0.76rem;
+    font-weight: 800;
+  }
+  strong {
+    display: block;
+  }
+}
+
+td small,
+.note {
+  display: block;
+  margin-top: 3px;
+  color: var(--mp-muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.wrap {
+  min-width: 180px;
+  max-width: 240px;
+  white-space: normal !important;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border: 1px solid var(--dash-line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--mp-ink-soft);
+    font: inherit;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+  mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+  }
+}
+
+.none {
+  color: var(--mp-muted) !important;
+  font-weight: 500 !important;
+}

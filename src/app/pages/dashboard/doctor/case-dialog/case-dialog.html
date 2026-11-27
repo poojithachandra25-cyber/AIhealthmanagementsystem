@@ -1,0 +1,205 @@
+<header class="head">
+  <span class="token" title="Position in the day's schedule">{{ token() }}</span>
+  <div class="who">
+    <h2 mat-dialog-title>{{ appt()?.patient ?? 'Patient' }}</h2>
+    @if (appt(); as a) {
+      <p>
+        {{ fullDate(a.date) }} · {{ timeLabel(a.time) }}
+        <span class="status-pill" [class]="a.status">{{ a.status }}</span>
+        @if (a.type === 'emergency') {
+          <span class="status-pill cancelled">Emergency</span>
+        }
+      </p>
+    }
+  </div>
+  <button mat-icon-button aria-label="Close" (click)="close()"><mat-icon>close</mat-icon></button>
+</header>
+
+<mat-dialog-content>
+  @if (loading() && !file()) {
+    <div class="state"><mat-spinner diameter="26" /> Loading the patient's file…</div>
+  } @else if (error()) {
+    <div class="state error">{{ error() }} <button mat-button (click)="load()">Try again</button></div>
+  } @else if (file(); as f) {
+    <mat-tab-group [selectedIndex]="tab()" (selectedIndexChange)="tab.set($event)" mat-stretch-tabs="false" animationDuration="150ms">
+      <!-- Visit -->
+      <mat-tab label="Visit">
+        <div class="pane">
+          <section class="grid2">
+            <div class="box">
+              <h3>Patient</h3>
+              <dl>
+                <div><dt>Name</dt><dd>{{ f.patient.name }}</dd></div>
+                <div><dt>Age / gender</dt><dd>{{ patientMeta(f.patient.dateOfBirth, f.patient.gender) || '—' }}</dd></div>
+                <div><dt>Blood group</dt><dd>{{ f.patient.bloodGroup || '—' }}</dd></div>
+                <div><dt>Phone</dt><dd>{{ f.patient.phone || '—' }}</dd></div>
+                <div><dt>Email</dt><dd>{{ f.patient.email }}</dd></div>
+                <div><dt>Emergency contact</dt><dd>{{ f.patient.emergencyContactName ? f.patient.emergencyContactName + ' · ' + (f.patient.emergencyContactPhone || '') : '—' }}</dd></div>
+              </dl>
+            </div>
+            <div class="box">
+              <h3>This visit</h3>
+              <dl>
+                <div><dt>Type</dt><dd class="cap">{{ f.appointment.type }}</dd></div>
+                <div><dt>Reason</dt><dd>{{ f.appointment.reason || 'Not given' }}</dd></div>
+                <div><dt>Payment</dt><dd>
+                  @if (f.appointment.billStatus) {
+                    <span class="status-pill" [class]="billMeta[f.appointment.billStatus].css">{{ billMeta[f.appointment.billStatus].label }}</span>
+                  } @else { — }
+                </dd></div>
+                <div><dt>Diagnosis</dt><dd>{{ f.consultation?.diagnosis || 'Not recorded yet' }}</dd></div>
+              </dl>
+            </div>
+          </section>
+
+          @if (nextActions().length) {
+            <div class="outcome">
+              <span>Update status</span>
+              @for (s of nextActions(); track s) {
+                <button type="button" [class]="s" [disabled]="data.store.busy() === f.appointment.id" (click)="setStatus(s)">
+                  <mat-icon>{{ actions[s]!.icon }}</mat-icon>{{ actions[s]!.label }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- Reports -->
+      <mat-tab label="Reports ({{ labReports().length + f.uploads.length }})">
+        <div class="pane">
+          <h3>Uploaded by the patient</h3>
+          @for (u of f.uploads; track u.id) {
+            <article class="rec upload">
+              <span class="ic"><mat-icon>{{ u.mimeType === 'application/pdf' ? 'picture_as_pdf' : 'image' }}</mat-icon></span>
+              <div>
+                <strong>{{ u.title }}</strong>
+                @if (u.notes) { <p>{{ u.notes }}</p> }
+                <small>Report date {{ fullDate(u.date) }} · {{ u.fileName }} · {{ fileSize(u.size) }}</small>
+              </div>
+              <div class="file-btns">
+                <button type="button" (click)="viewUpload(u)" [attr.aria-label]="'View ' + u.title"><mat-icon>visibility</mat-icon>View</button>
+                <button type="button" (click)="openUpload(u.id, u.fileName, true)" [attr.aria-label]="'Download ' + u.title"><mat-icon>download</mat-icon></button>
+              </div>
+            </article>
+          } @empty {
+            <p class="empty">The patient hasn't uploaded any lab reports.</p>
+          }
+
+          <h3>Lab results recorded by doctors</h3>
+          @if (update && canWrite()) {
+            <form class="add" (submit)="$event.preventDefault(); addReport()">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Test name</mat-label>
+                <input matInput maxlength="160" placeholder="e.g. Complete blood count" [value]="reportTitle()" (input)="reportTitle.set($any($event.target).value)" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Results (optional if you upload the report)</mat-label>
+                <textarea matInput rows="2" maxlength="2000" placeholder="Values and reference ranges" [value]="reportDetails()" (input)="reportDetails.set($any($event.target).value)"></textarea>
+              </mat-form-field>
+              <div class="add-row">
+                <label class="attach" [class.has-file]="reportFile()">
+                  <input type="file" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" (change)="pickReportFile($any($event.target))" />
+                  <mat-icon>{{ reportFile() ? 'description' : 'upload_file' }}</mat-icon>
+                  @if (reportFile(); as rf) {
+                    <span>{{ rf.name }} · {{ fileSize(rf.size) }}</span>
+                    <button type="button" class="del" aria-label="Remove file" (click)="$event.preventDefault(); reportFile.set(null)"><mat-icon>close</mat-icon></button>
+                  } @else {
+                    <span>Upload lab report (PDF, PNG or JPG · up to 5 MB)</span>
+                  }
+                </label>
+                <button mat-flat-button type="submit" [disabled]="!canAddReport() || savingReport()">
+                  <mat-icon>add</mat-icon> Add lab report
+                </button>
+              </div>
+              @if (reportFileError()) {
+                <p class="file-error" role="alert">{{ reportFileError() }}</p>
+              }
+            </form>
+          }
+          @for (r of labReports(); track r.id) {
+            <article class="rec lab_report">
+              <span class="ic"><mat-icon>science</mat-icon></span>
+              <div>
+                <strong>{{ r.title }}</strong>
+                @if (r.details) { <p>{{ r.details }}</p> }
+                <small>
+                  {{ r.doctor }} · {{ r.department }} · {{ fullDate(r.date) }}
+                  @if (r.fileName) { · Attached: {{ r.fileName }} }
+                </small>
+              </div>
+              <div class="file-btns">
+                <button type="button" (click)="viewRecord(r)" [attr.aria-label]="'View ' + r.title"><mat-icon>visibility</mat-icon>View</button>
+                @if (update && r.mine && !r.consultationId) {
+                  <button type="button" class="del" [class.armed]="confirmDelete() === r.id" (click)="removeReport(r.id)" [attr.aria-label]="'Delete ' + r.title">
+                    @if (confirmDelete() === r.id) { Delete? } @else { <mat-icon>delete_outline</mat-icon> }
+                  </button>
+                }
+              </div>
+            </article>
+          } @empty {
+            <p class="empty">No lab reports on file for this patient.</p>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- History -->
+      <mat-tab label="History">
+        <div class="pane">
+          <h3>Visits with you</h3>
+          <div class="dash-table-wrap">
+            <table class="dash-table">
+              <thead><tr><th>Date</th><th>Type</th><th>Reason</th><th>Diagnosis</th><th>Status</th></tr></thead>
+              <tbody>
+                @for (h of f.history; track h.id) {
+                  <tr [class.current]="h.id === f.appointment.id">
+                    <td>{{ fullDate(h.date) }} · {{ timeLabel(h.time) }}</td>
+                    <td class="cap">{{ h.type }}</td>
+                    <td class="wrap">{{ h.reason || '—' }}</td>
+                    <td class="wrap">{{ h.diagnosis || '—' }}</td>
+                    <td><span class="status-pill" [class]="h.status">{{ h.status }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Medical records</h3>
+          @for (r of otherRecords(); track r.id) {
+            <article class="rec" [class]="r.type">
+              <span class="ic"><mat-icon>{{ meta[r.type].icon }}</mat-icon></span>
+              <div>
+                <strong>{{ r.title }}</strong>
+                @if (r.details) { <p>{{ r.details }}</p> }
+                <small>{{ meta[r.type].label }} · {{ r.doctor }} · {{ fullDate(r.date) }}</small>
+              </div>
+            </article>
+          } @empty {
+            <p class="empty">No prescriptions, diagnoses or advice on file yet.</p>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- Prescription (Update only) -->
+      @if (update) {
+        <mat-tab label="Prescription">
+          <div class="pane">
+            @if (canWrite()) {
+              <app-prescription-form
+                [appointment]="f.appointment"
+                [consultation]="f.consultation"
+                [today]="data.store.today"
+                (saved)="onSaved($event)"
+              />
+            } @else {
+              <p class="empty">
+                <mat-icon>info_outline</mat-icon>
+                Confirm the appointment (Visit tab) before writing a prescription.
+              </p>
+            }
+          </div>
+        </mat-tab>
+      }
+    </mat-tab-group>
+  }
+</mat-dialog-content>

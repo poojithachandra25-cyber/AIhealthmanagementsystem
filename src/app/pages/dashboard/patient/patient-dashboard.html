@@ -1,0 +1,141 @@
+@if (current() === 'book') {
+  <app-book-appointment [preselect]="doctor()" (booked)="onBooked($event)" />
+} @else if (current() === 'profile') {
+  <app-profile-view />
+} @else if (store.loading() && !store.loaded()) {
+  <div class="dash-card state"><mat-spinner diameter="28" /> Loading your health summary…</div>
+} @else if (store.error()) {
+  <div class="dash-card state">
+    {{ store.error() }}
+    <button type="button" class="dash-link" (click)="store.load()">Try again</button>
+  </div>
+} @else {
+  @switch (current()) {
+    @case ('myappointments') {
+      <app-appointments-view />
+    }
+    @case ('records') {
+      <app-records-view />
+    }
+    @case ('billing') {
+      <app-billing-view [pay]="pay()" />
+    }
+    @default {
+      <section class="dash-kpis">
+        @for (kpi of kpis(); track kpi.label) {
+          <div class="dash-card kpi">
+            <span><mat-icon>{{ kpi.icon }}</mat-icon>{{ kpi.label }}</span>
+            <strong>{{ kpi.value }}</strong>
+            <small>{{ kpi.note }}</small>
+          </div>
+        }
+      </section>
+
+      <section class="row top">
+        <div class="dash-card next-card">
+          <div class="dash-card-head">
+            <h2>Next appointment</h2>
+            @if (next(); as n) {
+              <span class="badge">{{ n.status }}</span>
+            }
+          </div>
+          @if (next(); as n) {
+            <div class="who">
+              <span class="initials">{{ initials(n.doctor) }}</span>
+              <div>
+                <strong>{{ n.doctor }}</strong>
+                <small>{{ n.doctorTitle }} · {{ n.department }}</small>
+              </div>
+            </div>
+            <div class="chips">
+              <span>{{ dayLabel(n.date) }}</span>
+              <span>{{ timeLabel(n.time) }}</span>
+              <span [class.emergency]="n.type === 'emergency'">{{ n.type }}</span>
+            </div>
+            <div class="next-actions">
+              <a class="light" routerLink="/dashboard" [queryParams]="{ view: 'myappointments' }">All appointments</a>
+              <button type="button" class="ghost" [disabled]="store.cancelling() === n.id" (click)="store.cancel(n)">
+                Cancel
+              </button>
+            </div>
+          } @else {
+            <p class="empty">You have no upcoming visits. Pick a doctor and a time that suits you.</p>
+            <div class="next-actions single">
+              <a class="light" routerLink="/dashboard" [queryParams]="{ view: 'book' }">Book an appointment</a>
+            </div>
+          }
+        </div>
+
+        <div class="dash-card">
+          <div class="dash-card-head">
+            <h2>Payments due</h2>
+            <a class="dash-link" routerLink="/dashboard" [queryParams]="{ view: 'billing' }">Billing</a>
+          </div>
+          @for (b of store.payable().slice(0, 3); track b.id) {
+            <div class="list-row">
+              <div>
+                <strong>{{ money(b.total) }}</strong>
+                <small>{{ b.doctor }} · {{ fullDate(b.date) }}</small>
+              </div>
+              <button type="button" class="pay" (click)="payBill(b)">
+                {{ b.status === 'failed' ? 'Retry' : 'Pay' }}
+              </button>
+            </div>
+          } @empty {
+            <p class="muted"><mat-icon>verified</mat-icon> All bills are paid.</p>
+          }
+        </div>
+
+        <div class="dash-card">
+          <div class="dash-card-head">
+            <h2>Recent records</h2>
+            <a class="dash-link" routerLink="/dashboard" [queryParams]="{ view: 'records' }">View all</a>
+          </div>
+          @for (r of recentRecords(); track r.id) {
+            <div class="list-row rec">
+              <span class="rec-icon" [class]="r.type"><mat-icon>{{ recordMeta[r.type].icon }}</mat-icon></span>
+              <div>
+                <strong>{{ r.title }}</strong>
+                <small>{{ recordMeta[r.type].label }} · {{ r.doctor }}</small>
+              </div>
+            </div>
+          } @empty {
+            <p class="muted">No records yet. Your doctor adds them after a confirmed visit.</p>
+          }
+        </div>
+      </section>
+
+      <div class="dash-card">
+        <div class="dash-card-head">
+          <h2>Upcoming appointments</h2>
+          <a class="dash-link" routerLink="/dashboard" [queryParams]="{ view: 'myappointments' }">See all appointments</a>
+        </div>
+        <div class="dash-table-wrap">
+          <table class="dash-table">
+            <thead>
+              <tr><th>Doctor</th><th>Department</th><th>Date &amp; time</th><th>Type</th><th>Status</th><th>Payment</th></tr>
+            </thead>
+            <tbody>
+              @for (a of upcomingList(); track a.id) {
+                <tr>
+                  <td>{{ a.doctor }}</td>
+                  <td>{{ a.department }}</td>
+                  <td>{{ fullDate(a.date) }} · {{ timeLabel(a.time) }}</td>
+                  <td><span class="type" [class.emergency]="a.type === 'emergency'">{{ a.type }}</span></td>
+                  <td><span class="status-pill" [class]="a.status">{{ a.status }}</span></td>
+                  <td>
+                    @if (a.billStatus) {
+                      <span class="status-pill" [class]="billMeta[a.billStatus].css">{{ billMeta[a.billStatus].label }}</span>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="6" class="muted">No upcoming appointments.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  }
+}

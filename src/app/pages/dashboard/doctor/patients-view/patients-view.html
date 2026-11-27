@@ -1,0 +1,101 @@
+<div class="dash-card">
+  <div class="dash-card-head">
+    <div>
+      <h2>Patients</h2>
+      <small>Everyone who has booked with you. Confirm or cancel upcoming visits right here.</small>
+    </div>
+    @if (awaiting()) {
+      <span class="badge">{{ awaiting() }} awaiting confirmation</span>
+    }
+  </div>
+
+  <div class="toolbar">
+    <label class="search">
+      <mat-icon>search</mat-icon>
+      <input type="search" placeholder="Search name, email or phone" aria-label="Search patients"
+        [value]="query()" (input)="query.set($any($event.target).value)" />
+    </label>
+    <label class="toggle">
+      <input type="checkbox" [checked]="onlyOpen()" (change)="onlyOpen.set($any($event.target).checked)" />
+      Only patients with upcoming visits
+    </label>
+  </div>
+
+  @if (loading()) {
+    <div class="state"><mat-spinner diameter="24" /> Loading patients…</div>
+  } @else if (error()) {
+    <div class="state">{{ error() }} <button type="button" class="dash-link" (click)="load()">Try again</button></div>
+  } @else {
+    <div class="dash-table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Contact</th>
+            <th>Visits</th>
+            <th>Last visit</th>
+            <th>Upcoming appointments</th>
+            <th><span class="sr-only">History</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of shown(); track p.id) {
+            <tr>
+              <td>
+                <div class="who">
+                  <span class="avatar">{{ initials(p.name) }}</span>
+                  <div>
+                    <strong>{{ p.name }}</strong>
+                    <small>{{ patientMeta(p.dateOfBirth, p.gender) || 'Age not given' }}{{ p.bloodGroup ? ' · ' + p.bloodGroup : '' }}</small>
+                  </div>
+                </div>
+              </td>
+              <td class="contact">
+                <span>{{ p.phone || '—' }}</span>
+                <small>{{ p.email }}</small>
+              </td>
+              <td>
+                <div class="counts">
+                  <span title="Completed">{{ p.completed }} done</span>
+                  @if (p.missed) { <span class="missed" title="Missed">{{ p.missed }} missed</span> }
+                  @if (p.cancelled) { <span class="cancelled" title="Cancelled">{{ p.cancelled }} cancelled</span> }
+                </div>
+              </td>
+              <td>{{ p.lastVisit ? fullDate(p.lastVisit) : '—' }}</td>
+              <td class="open">
+                @for (a of p.open; track a.id) {
+                  <div class="slot">
+                    <div>
+                      <strong>{{ fullDate(a.date) }} · {{ timeLabel(a.time) }}</strong>
+                      <small>
+                        <span class="status-pill" [class]="a.status">{{ a.status }}</span>
+                        @if (a.type === 'emergency') { <span class="status-pill cancelled">Emergency</span> }
+                      </small>
+                    </div>
+                    <div class="btns">
+                      @if (a.status === 'pending') {
+                        <button type="button" class="ok" [disabled]="store.busy() === a.id" (click)="act(p, a, 'confirmed')">
+                          <mat-icon>check</mat-icon>Confirm
+                        </button>
+                      }
+                      <button type="button" class="no" [disabled]="store.busy() === a.id" (click)="act(p, a, 'cancelled')">
+                        <mat-icon>close</mat-icon>Cancel
+                      </button>
+                    </div>
+                  </div>
+                } @empty {
+                  <span class="none">No upcoming visits</span>
+                }
+              </td>
+              <td>
+                <button type="button" class="hist" (click)="history(p)"><mat-icon>history</mat-icon>History</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="none">{{ patients().length ? 'No patients match.' : 'No patients have booked with you yet.' }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

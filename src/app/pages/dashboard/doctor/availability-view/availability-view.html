@@ -1,0 +1,69 @@
+<div class="dash-card">
+  <div class="dash-card-head">
+    <div>
+      <h2>Availability</h2>
+      <small>Set the days and hours patients can book you. Changes show on the patient dashboard straight away.</small>
+    </div>
+    <span class="summary">{{ summary().days }} days · {{ summary().slots }} slots a week</span>
+  </div>
+
+  <div class="slot-len">
+    <span>Appointment length</span>
+    <div class="segmented" role="radiogroup" aria-label="Appointment length">
+      @for (m of slotChoices; track m) {
+        <button type="button" role="radio" [attr.aria-checked]="slotMinutes() === m" [class.active]="slotMinutes() === m" (click)="setSlot(m)">
+          {{ m }} min
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="days">
+    @for (r of ordered(); track r.day) {
+      <div class="day" [class.off]="!r.on" [class.bad]="problems().includes(r.name)">
+        <label class="switch">
+          <input type="checkbox" [checked]="r.on" (change)="patch(r.day, { on: $any($event.target).checked })" />
+          <span class="name">{{ r.name }}</span>
+        </label>
+
+        @if (r.on) {
+          <div class="hours">
+            <select [attr.aria-label]="r.name + ' start'" [value]="r.start" (change)="patch(r.day, { start: $any($event.target).value })">
+              @for (t of times; track t) {
+                <option [value]="t" [selected]="t === r.start">{{ timeLabel(t) }}</option>
+              }
+            </select>
+            <span>to</span>
+            <select [attr.aria-label]="r.name + ' end'" [value]="r.end" (change)="patch(r.day, { end: $any($event.target).value })">
+              @for (t of times; track t) {
+                <option [value]="t" [selected]="t === r.end">{{ timeLabel(t) }}</option>
+              }
+            </select>
+          </div>
+          <span class="count">{{ slotsFor(r) }} slots</span>
+          <button type="button" class="copy" (click)="applyToAll(r)" title="Use these hours on every working day">
+            <mat-icon>content_copy</mat-icon>Apply to all
+          </button>
+        } @else {
+          <span class="closed">Not available</span>
+        }
+      </div>
+    }
+  </div>
+
+  @if (problems().length) {
+    <p class="error"><mat-icon>error_outline</mat-icon>{{ problems().join(', ') }}: the end time must leave room for at least one {{ slotMinutes() }}-minute slot.</p>
+  }
+
+  <div class="actions">
+    <small>Booked appointments are kept even if they fall outside new hours.</small>
+    <button mat-button type="button" [disabled]="!dirty() || saving()" (click)="reset()">Discard</button>
+    <button mat-flat-button type="button" [disabled]="!dirty() || saving() || problems().length > 0" (click)="save()">
+      @if (saving()) {
+        <mat-spinner diameter="18" />
+      } @else {
+        Save availability
+      }
+    </button>
+  </div>
+</div>

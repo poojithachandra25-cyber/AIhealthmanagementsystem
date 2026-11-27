@@ -1,0 +1,88 @@
+<div class="dash-card">
+  <div class="dash-card-head intro">
+    <div>
+      <h2>Book an appointment</h2>
+      <small>Choose a doctor, then pick a day and time. Fees vary by department; emergency visits cost more.</small>
+    </div>
+    <a class="dash-link" routerLink="/dashboard"><mat-icon>arrow_back</mat-icon>Back to dashboard</a>
+  </div>
+
+  <div class="filters">
+    <div class="segmented chips" role="tablist" aria-label="Filter by department">
+      <button type="button" role="tab" [class.active]="department() === 'all'" (click)="department.set('all')">
+        All
+      </button>
+      @for (d of departments(); track d.slug) {
+        <button type="button" role="tab" [class.active]="department() === d.slug" (click)="department.set(d.slug)">
+          {{ d.name }}
+        </button>
+      }
+    </div>
+    <label class="search">
+      <mat-icon>search</mat-icon>
+      <input
+        type="search"
+        placeholder="Search doctors"
+        aria-label="Search doctors"
+        [value]="query()"
+        (input)="query.set($any($event.target).value)"
+      />
+    </label>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="dash-card state"><mat-spinner diameter="28" /> Loading doctors…</div>
+} @else if (error()) {
+  <div class="dash-card state">
+    {{ error() }}
+    <button type="button" class="dash-link" (click)="load()">Try again</button>
+  </div>
+} @else {
+  <div class="grid">
+    @for (doc of shown(); track doc.id) {
+      <article class="dash-card doctor" [style.--accent-1]="doc.accentFrom" [style.--accent-2]="doc.accentTo">
+        <div class="top">
+          @if (doc.image && !brokenPhotos().has(doc.id)) {
+            <img [src]="doc.image" [alt]="doc.name" loading="lazy" (error)="photoFailed(doc.id)" />
+          } @else {
+            <span class="photo">{{ initialsOf(doc.name) }}</span>
+          }
+          <div>
+            <span class="dept">{{ doc.department }}</span>
+            <h3>{{ doc.name }}</h3>
+            <small>{{ doc.title }} · {{ doc.experience }} yrs</small>
+          </div>
+        </div>
+
+        <div class="avail">
+          <span class="label">Available days</span>
+          <div class="week" [attr.aria-label]="'Available days for ' + doc.name">
+            @for (name of days; track $index) {
+              <span [class.on]="works(doc, $index)" [attr.aria-hidden]="!works(doc, $index)">{{ name }}</span>
+            }
+          </div>
+          <span class="hours"><mat-icon>schedule</mat-icon>{{ hours(doc) }}</span>
+        </div>
+
+        <div class="fees" aria-label="Consultation fees">
+          <div>
+            <span>Consultation</span>
+            <strong>{{ moneyWhole(doc.consultationFee) }}</strong>
+          </div>
+          <div class="emergency">
+            <span>Emergency</span>
+            <strong>{{ moneyWhole(doc.emergencyFee) }}</strong>
+          </div>
+          <small>+ {{ gstRate() }}% GST</small>
+        </div>
+
+        <button type="button" class="book" (click)="book(doc)">
+          <mat-icon>event_available</mat-icon>Book
+        </button>
+      </article>
+    } @empty {
+      <div class="dash-card state">No doctors match your search.</div>
+    }
+  </div>
+}

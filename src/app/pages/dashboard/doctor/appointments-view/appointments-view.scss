@@ -1,0 +1,162 @@
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.segmented {
+  flex-wrap: wrap;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--dash-line);
+  border-radius: 10px;
+  color: var(--mp-muted);
+
+  input {
+    width: 220px;
+    border: 0;
+    outline: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.85rem;
+  }
+  &:focus-within {
+    border-color: var(--dash-accent);
+  }
+  @media (max-width: 600px) {
+    width: 100%;
+
+    input {
+      width: 100%;
+    }
+  }
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  strong {
+    display: block;
+  }
+  small {
+    color: var(--mp-muted);
+    font-size: 0.72rem;
+    font-weight: 500;
+  }
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--dash-accent-soft);
+  color: var(--dash-accent);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.type {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #eef2f7;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: capitalize;
+
+  &.emergency {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+}
+
+.reason {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rx {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
+  color: var(--dash-accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+
+  mat-icon {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+  }
+}
+
+tr.flag td {
+  background: #fffbeb;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border: 1px solid var(--dash-line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--mp-ink-soft);
+    font: inherit;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+  .update {
+    border-color: var(--dash-navy);
+    background: var(--dash-navy);
+    color: #fff;
+  }
+  mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+  }
+}
+
+.empty {
+  color: var(--mp-muted) !important;
+  font-weight: 500 !important;
+}

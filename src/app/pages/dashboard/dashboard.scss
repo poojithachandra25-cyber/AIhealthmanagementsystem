@@ -1,0 +1,272 @@
+:host {
+  display: block;
+  background: var(--dash-bg);
+  min-height: 100vh;
+}
+
+$side: 240px;
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  width: $side;
+  box-sizing: border-box;
+  padding: 24px 16px 16px;
+  background: var(--dash-navy);
+  color: #cbd5e1;
+  overflow-y: auto;
+  transition: transform 0.25s ease;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px;
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-decoration: none;
+
+  span span {
+    color: #5eead4;
+  }
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--dash-accent);
+}
+
+.portal {
+  margin: 6px 0 22px 52px;
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+nav,
+.side-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+nav button,
+.side-foot button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+  }
+}
+
+nav button.active {
+  background: var(--dash-accent);
+  color: #fff;
+}
+
+.side-foot {
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.help {
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.78rem;
+
+  strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #fff;
+  }
+}
+
+.main {
+  margin-left: $side;
+  padding: 28px 28px 40px;
+  max-width: 1320px;
+  box-sizing: border-box;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+
+  h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  p {
+    margin: 4px 0 0;
+    color: var(--mp-muted);
+    font-size: 0.8rem;
+  }
+}
+
+.hello {
+  min-width: 0;
+  flex: 1;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  height: 40px;
+  border: 1px solid var(--dash-line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--mp-muted);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+  input {
+    width: 190px;
+    border: 0;
+    outline: 0;
+    font: inherit;
+    font-size: 0.82rem;
+    color: var(--mp-ink);
+  }
+}
+
+.bell,
+.primary,
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.bell {
+  width: 40px;
+  border: 1px solid var(--dash-line);
+  background: #fff;
+  color: var(--mp-ink);
+  cursor: pointer;
+}
+
+.primary {
+  gap: 4px;
+  padding: 0 16px;
+  background: var(--dash-accent);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: none;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+  &:hover {
+    background: #0b5d57;
+  }
+}
+
+.avatar {
+  width: 40px;
+  border-radius: 50%;
+  background: var(--dash-accent-soft);
+  color: var(--dash-accent);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.nav-toggle,
+.scrim {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .search {
+    display: none;
+  }
+}
+
+@media (max-width: 960px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .nav-open .sidebar {
+    transform: none;
+  }
+  .nav-open .scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background: rgba(15, 23, 42, 0.45);
+  }
+  .main {
+    margin-left: 0;
+    padding: 18px 16px 32px;
+  }
+  .nav-toggle {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 600px) {
+  .actions {
+    width: 100%;
+  }
+  .primary {
+    flex: 1;
+  }
+  .topbar h1 {
+    font-size: 1.3rem;
+  }
+}

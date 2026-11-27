@@ -1,0 +1,105 @@
+<div class="page-shell">
+  <section class="auth-wrap">
+    <aside class="auth-aside">
+      <div>
+        <span class="eyebrow">MedPoint portal</span>
+        <h2>Your health, connected in one secure place.</h2>
+        <p>Sign in to manage appointments, records and care, whatever your role.</p>
+      </div>
+      <ul class="aside-list">
+        <li><mat-icon>event_available</mat-icon> Book and track appointments</li>
+        <li><mat-icon>folder_shared</mat-icon> Access medical records anytime</li>
+        <li><mat-icon>shield</mat-icon> Protected with secure sign-in</li>
+      </ul>
+    </aside>
+
+    <div class="auth-main">
+      <h1>Welcome back</h1>
+      <p class="lead">Choose your role and sign in to continue.</p>
+
+      @if (notice) {
+        <p class="hint" role="status"><mat-icon>schedule</mat-icon> {{ notice }}</p>
+      }
+
+      @if (doctor()) {
+        <p class="booking-note">
+          <mat-icon>event_available</mat-icon>
+          <span>
+            Sign in to book your appointment with <strong>{{ doctor() }}</strong>
+            @if (department()) {
+              ({{ department() }})
+            }
+          </span>
+        </p>
+      }
+
+      <span class="role-label" id="role-label">SIGN IN AS</span>
+      <div class="role-picker" role="radiogroup" aria-labelledby="role-label">
+        @for (option of roles; track option.value) {
+          <button
+            type="button"
+            class="role-option"
+            role="radio"
+            [attr.aria-checked]="role() === option.value"
+            [class.selected]="role() === option.value"
+            (click)="role.set(option.value)"
+          >
+            <mat-icon>{{ option.icon }}</mat-icon>
+            {{ option.label }}
+            <small>{{ option.tagline }}</small>
+          </button>
+        }
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email address</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="email" />
+          <mat-icon matPrefix>mail</mat-icon>
+          @if (form.controls.email.hasError('required')) {
+            <mat-error>Email is required</mat-error>
+          } @else if (form.controls.email.hasError('email')) {
+            <mat-error>Enter a valid email</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [type]="hidePassword() ? 'password' : 'text'"
+            formControlName="password"
+            autocomplete="current-password"
+          />
+          <mat-icon matPrefix>lock</mat-icon>
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePassword.set(!hidePassword())"
+            [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+          @if (form.controls.password.hasError('required')) {
+            <mat-error>Password is required</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="form-row forgot-row">
+          <a routerLink="/forgot-password">Forgot password?</a>
+        </div>
+
+        <button mat-flat-button class="pill-button submit-button" type="submit" [disabled]="loading()">
+          @if (loading()) {
+            <mat-spinner diameter="22" />
+          } @else {
+            Sign in as {{ roleLabel() }}
+          }
+        </button>
+      </form>
+
+      <p class="switch-link">New to MedPoint? <a routerLink="/signup">Create an account</a></p>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,181 @@
+@if (loading()) {
+  <div class="dash-card state"><mat-spinner diameter="28" /> Loading revenue…</div>
+} @else if (error()) {
+  <div class="dash-card state">{{ error() }} <button type="button" class="dash-link" (click)="load()">Try again</button></div>
+} @else if (data(); as d) {
+  <section class="dash-kpis">
+    @for (k of kpis(); track k.label) {
+      <div class="dash-card kpi">
+        <span><mat-icon>{{ k.icon }}</mat-icon>{{ k.label }}</span>
+        <strong>{{ k.value }}</strong>
+        <small>{{ k.note }}</small>
+      </div>
+    }
+  </section>
+
+  <section class="row">
+    <!-- Revenue by month: single series, so no legend; the title names it. -->
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h2>Revenue by month</h2>
+        <small>Successful payments incl. GST · last 6 months</small>
+      </div>
+      <div class="cols" role="group" aria-label="Revenue by month, last 6 months. Each column is a button with its amount; a table view follows.">
+        <div class="axis">
+          @for (t of months().ticks; track t) {
+            <span [style.bottom.%]="(t / months().top) * 100">{{ axis(t) }}</span>
+          }
+        </div>
+        <div class="plot" (mouseleave)="hover.set(null)">
+          @for (t of months().ticks; track t) {
+            <i class="grid" [style.bottom.%]="(t / months().top) * 100"></i>
+          }
+          @for (m of months().list; track m.key; let i = $index; let last = $last) {
+            <button
+              type="button"
+              class="band"
+              [class.dim]="hover() !== null && hover() !== i"
+              [attr.aria-label]="m.long + ': ' + money(m.revenue) + ' from ' + m.bills + ' payments'"
+              (mouseenter)="hover.set(i)"
+              (focus)="hover.set(i)"
+              (blur)="hover.set(null)"
+            >
+              @if (last && m.revenue) {
+                <span class="cap" [style.bottom.%]="(m.revenue / months().top) * 100">{{ moneyWhole(m.revenue) }}</span>
+              }
+              <span class="col" [style.height.%]="(m.revenue / months().top) * 100"></span>
+              @if (hover() === i) {
+                <span class="tip" role="tooltip">
+                  <strong>{{ m.long }}</strong>
+                  {{ money(m.revenue) }} · {{ m.bills }} payment{{ m.bills === 1 ? '' : 's' }}
+                </span>
+              }
+            </button>
+          }
+        </div>
+        <div class="labels">
+          @for (m of months().list; track m.key) {
+            <span>{{ m.label }}</span>
+          }
+        </div>
+      </div>
+      @if (months().empty) {
+        <p class="none">No payments in the last 6 months yet.</p>
+      }
+      <details class="table-view">
+        <summary>View as table</summary>
+        <table class="dash-table">
+          <thead><tr><th>Month</th><th>Payments</th><th>Revenue</th></tr></thead>
+          <tbody>
+            @for (m of months().list; track m.key) {
+              <tr><td>{{ m.long }}</td><td>{{ m.bills }}</td><td>{{ money(m.revenue) }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </details>
+    </div>
+
+    <!-- Payment methods: one whole split into parts (tall segmented bar) with a legend. -->
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h2>Payment methods</h2>
+        <small>{{ money(methodTotal()) }} collected</small>
+      </div>
+      @if (methodTotal()) {
+        <div class="seg" role="img" [attr.aria-label]="'Revenue by payment method'">
+          @for (m of methods(); track m.key) {
+            @if (m.revenue) {
+              <span
+                class="part"
+                tabindex="0"
+                [style.flex-grow]="m.revenue"
+                [style.background]="m.color"
+                [title]="m.label + ': ' + money(m.revenue) + ' (' + m.share + '%)'"
+                [attr.aria-label]="m.label + ': ' + money(m.revenue) + ', ' + m.share + ' percent'"
+              ></span>
+            }
+          }
+        </div>
+      } @else {
+        <p class="none">No successful payments yet.</p>
+      }
+      <ul class="legend">
+        @for (m of methods(); track m.key) {
+          <li>
+            <i [style.background]="m.color"></i>
+            <span class="name">{{ m.label }}</span>
+            <span class="val">{{ money(m.revenue) }}</span>
+            <span class="sub">{{ m.share }}% · {{ m.bills }} payment{{ m.bills === 1 ? '' : 's' }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="row">
+    <!-- Revenue by department: magnitude across categories, one hue, value at the tip. -->
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h2>Revenue by department</h2>
+        <small>Successful payments incl. GST</small>
+      </div>
+      <div class="bars">
+        @for (r of departments(); track r.label) {
+          <div class="bar-row" [title]="r.label + ': ' + money(r.revenue) + ' from ' + r.bills + ' payments'">
+            <span class="bar-label">{{ r.label }}</span>
+            <span class="track">
+              <span class="bar" [style.width.%]="r.pct"></span>
+              <span class="tip-val">{{ moneyWhole(r.revenue) }}</span>
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-card-head">
+        <h2>Top earning doctors</h2>
+      </div>
+      @for (r of d.byDoctor; track r.label; let i = $index) {
+        <div class="list-row">
+          <div>
+            <strong>{{ i + 1 }}. {{ r.label }}</strong>
+            <small>{{ r.department }} · {{ r.bills }} payment{{ r.bills === 1 ? '' : 's' }}</small>
+          </div>
+          <strong>{{ money(r.revenue) }}</strong>
+        </div>
+      } @empty {
+        <p class="none">No paid consultations yet.</p>
+      }
+    </div>
+  </section>
+
+  <div class="dash-card">
+    <div class="dash-card-head">
+      <h2>Recent transactions</h2>
+      <small>Latest successful, failed and refunded payments</small>
+    </div>
+    <div class="dash-table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr><th>Invoice</th><th>Patient</th><th>Doctor</th><th>Visit</th><th>Method</th><th>Amount</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          @for (b of d.recent; track b.id) {
+            <tr>
+              <td class="mono">{{ b.invoiceNo }}</td>
+              <td>{{ b.patient }}</td>
+              <td>{{ b.doctor }}<small>{{ b.department }}</small></td>
+              <td>{{ fullDate(b.date) }} · {{ timeLabel(b.time) }}</td>
+              <td>{{ b.methodDetail || '—' }}</td>
+              <td><strong>{{ money(b.total) }}</strong></td>
+              <td><span class="status-pill" [class]="billMeta[b.status].css">{{ billMeta[b.status].label }}</span></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="none">No transactions yet.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

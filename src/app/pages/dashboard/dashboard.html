@@ -1,0 +1,74 @@
+@if (auth.user(); as user) {
+  <div class="dash" [class.nav-open]="navOpen()">
+    <aside class="sidebar" aria-label="Dashboard navigation">
+      <a class="brand" routerLink="/">
+        <span class="brand-mark"><mat-icon>add</mat-icon></span>
+        <span>Med<span>Point</span></span>
+      </a>
+      <span class="portal">{{ user.role }} portal</span>
+
+      <nav>
+        @for (item of nav(); track item.label) {
+          <button type="button" [class.active]="activeLabel() === item.label" (click)="go(item)">
+            <mat-icon>{{ item.icon }}</mat-icon>
+            {{ item.label }}
+          </button>
+        }
+      </nav>
+
+      <div class="side-foot">
+        @if (!navHasLogout()) {
+          <button type="button" (click)="logout()"><mat-icon>logout</mat-icon>Log out</button>
+        }
+        <div class="help">
+          <strong>Need urgent help?</strong>
+          <span>Emergency line: +1 (800) 123-4567</span>
+        </div>
+      </div>
+    </aside>
+    <div class="scrim" (click)="navOpen.set(false)"></div>
+
+    <div class="main" id="top">
+      <header class="topbar">
+        <button mat-icon-button class="nav-toggle" aria-label="Open menu" (click)="navOpen.set(true)">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <div class="hello">
+          <h1>{{ greeting }}, {{ firstName() }}</h1>
+          <p>{{ idLabel() }} · {{ today }}</p>
+        </div>
+        <div class="actions">
+          <label class="search">
+            <mat-icon>search</mat-icon>
+            <input
+              #q
+              type="search"
+              placeholder="Search doctors, departments…"
+              aria-label="Search doctors and departments"
+              (keydown.enter)="search(q.value)"
+            />
+          </label>
+          <button type="button" class="bell" aria-label="Notifications" (click)="notifications()">
+            <mat-icon>notifications_none</mat-icon>
+          </button>
+          @if (cta(); as c) {
+            <a class="primary" [routerLink]="c.link" [queryParams]="c.query"><mat-icon>add</mat-icon>{{ c.label }}</a>
+          }
+          <span class="avatar" [title]="user.name">{{ initials() }}</span>
+        </div>
+      </header>
+
+      @switch (user.role) {
+        @case ('patient') {
+          <app-patient-dashboard [view]="view()" [doctor]="doctor()" [pay]="pay()" />
+        }
+        @case ('doctor') {
+          <app-doctor-dashboard [view]="view()" />
+        }
+        @case ('admin') {
+          <app-admin-dashboard [view]="view()" [add]="add()" />
+        }
+      }
+    </div>
+  </div>
+}

@@ -1,0 +1,31 @@
+<button
+  type="button"
+  class="trigger"
+  [class.active]="isOpen() || onDeptRoute()"
+  aria-haspopup="true"
+  [attr.aria-expanded]="isOpen()"
+  aria-controls="dept-panel"
+  (click)="toggle()"
+>
+  Our Departments
+  <mat-icon class="chevron" [class.open]="isOpen()">expand_more</mat-icon>
+</button>
+
+@if (isOpen()) {
+  <div class="panel" id="dept-panel">
+    <div class="panel-grid">
+      @for (dept of departments; track dept.slug) {
+        <a class="item" [routerLink]="['/departments', dept.slug]" [style]="accentVars(dept)">
+          <span class="item-icon"><mat-icon>{{ dept.icon }}</mat-icon></span>
+          <span>
+            <strong>{{ dept.title }}</strong>
+            <small>{{ dept.tagline }}</small>
+          </span>
+        </a>
+      }
+    </div>
+    <a class="view-all" routerLink="/departments">
+      View all departments <mat-icon>arrow_forward</mat-icon>
+    </a>
+  </div>
+}

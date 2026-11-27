@@ -1,0 +1,102 @@
+<div class="dash-card">
+  <div class="dash-card-head">
+    <div>
+      <h2>My uploaded lab reports</h2>
+      <small>Upload results from any lab. Doctors you book with can view them.</small>
+    </div>
+    @if (!formOpen()) {
+      <button type="button" class="upload-btn" (click)="formOpen.set(true)">
+        <mat-icon>upload_file</mat-icon>Upload lab report
+      </button>
+    }
+  </div>
+
+  @if (formOpen()) {
+    <form class="form" (submit)="$event.preventDefault(); upload()">
+      <label class="drop" [class.has-file]="file()">
+        <input type="file" [accept]="accept" (change)="pick($any($event.target))" />
+        <mat-icon>{{ file() ? 'description' : 'cloud_upload' }}</mat-icon>
+        @if (file(); as f) {
+          <strong>{{ f.name }}</strong>
+          <small>{{ fileSize(f.size) }} · click to choose a different file</small>
+        } @else {
+          <strong>Choose a file</strong>
+          <small>PDF, PNG or JPG · up to 5 MB</small>
+        }
+      </label>
+      @if (fileError()) {
+        <p class="error" role="alert">{{ fileError() }}</p>
+      }
+
+      <div class="grid">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Test name</mat-label>
+          <input matInput maxlength="160" placeholder="e.g. Complete blood count" [value]="title()" (input)="title.set($any($event.target).value)" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Report date</mat-label>
+          <input matInput type="date" [max]="today" [value]="date()" (input)="date.set($any($event.target).value)" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wide">
+          <mat-label>For doctor</mat-label>
+          <mat-select [value]="doctorId()" (selectionChange)="pickDoctor($event.value)">
+            @for (d of doctors(); track d.id) {
+              <mat-option [value]="d.id">{{ d.name }} · {{ d.department }}</mat-option>
+            }
+            <mat-option [value]="allDoctors">All my doctors</mat-option>
+          </mat-select>
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-hint>
+            {{ doctorId() === allDoctors
+              ? (doctors().length ? 'Every doctor you have booked can view it.' : "You haven't booked a doctor yet - doctors you book will be able to view it.")
+              : 'Only this doctor can view it.' }}
+          </mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wide">
+          <mat-label>Notes (optional)</mat-label>
+          <input matInput maxlength="1000" placeholder="Lab name, fasting, anything your doctor should know" [value]="notes()" (input)="notes.set($any($event.target).value)" />
+        </mat-form-field>
+      </div>
+
+      <div class="actions">
+        <button mat-button type="button" [disabled]="uploading()" (click)="reset()">Cancel</button>
+        <button mat-flat-button type="submit" [disabled]="!file() || !title().trim() || uploading()">
+          @if (uploading()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            <ng-container><mat-icon>upload</mat-icon> Upload</ng-container>
+          }
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (loading()) {
+    <p class="muted"><mat-spinner diameter="18" /> Loading your uploads…</p>
+  } @else {
+    @for (r of reports(); track r.id) {
+      <div class="item">
+        <span class="ic"><mat-icon>{{ r.mimeType === 'application/pdf' ? 'picture_as_pdf' : 'image' }}</mat-icon></span>
+        <div class="meta">
+          <strong>{{ r.title }}</strong>
+          <small class="for"><mat-icon>person</mat-icon>{{ r.doctorName ? 'For ' + r.doctorName : 'Shared with all your doctors' }}</small>
+          <small>{{ fullDate(r.date) }} · {{ r.fileName }} · {{ fileSize(r.size) }}</small>
+          @if (r.notes) {
+            <small class="notes">{{ r.notes }}</small>
+          }
+        </div>
+        <div class="btns">
+          <button type="button" (click)="open(r, false)" [attr.aria-label]="'View ' + r.title"><mat-icon>visibility</mat-icon>View</button>
+          <button type="button" (click)="open(r, true)" [attr.aria-label]="'Download ' + r.title"><mat-icon>download</mat-icon></button>
+          <button type="button" class="del" [class.armed]="confirmDelete() === r.id" (click)="remove(r)" [attr.aria-label]="'Delete ' + r.title">
+            @if (confirmDelete() === r.id) { Delete? } @else { <mat-icon>delete_outline</mat-icon> }
+          </button>
+        </div>
+      </div>
+    } @empty {
+      @if (!formOpen()) {
+        <p class="muted">You haven't uploaded any lab reports yet.</p>
+      }
+    }
+  }
+</div>

@@ -1,0 +1,152 @@
+@switch (current()) {
+  @case ('doctors') {
+    <app-admin-doctors [add]="add()" />
+  }
+  @case ('patients') {
+    <app-admin-patients />
+  }
+  @case ('revenue') {
+    <app-admin-revenue />
+  }
+  @default {
+@if (failed()) {
+  <p class="sample-note"><mat-icon>error_outline</mat-icon> Live hospital figures could not be loaded. Check that the API is running.</p>
+}
+
+<section class="dash-kpis">
+  @for (c of cards(); track c.key) {
+    <div class="dash-card stat" [style.--c]="c.color">
+      <div class="stat-top">
+        <span class="bubble"><mat-icon>{{ c.icon }}</mat-icon></span>
+        <div class="trend" [class.up]="c.pct > 0" [class.down]="c.pct < 0">
+          <span>
+            <mat-icon>{{ c.pct > 0 ? 'trending_up' : c.pct < 0 ? 'trending_down' : 'trending_flat' }}</mat-icon>
+            {{ c.pct > 0 ? '+' : '' }}{{ c.pct }}%
+          </span>
+          <small>in last 7 days</small>
+        </div>
+      </div>
+      <div class="stat-bottom">
+        <div>
+          <strong>{{ c.value ?? '…' }}</strong>
+          <span>{{ c.label }}</span>
+        </div>
+        <svg [attr.viewBox]="'0 0 ' + spark.w + ' ' + spark.h" [attr.aria-label]="c.label + ', new per day over the last 7 days'" role="img">
+          @if (c.kind === 'bars') {
+            @for (b of c.bars; track $index) {
+              <rect [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.w" [attr.height]="b.h" rx="2" [class.last]="b.last" />
+            }
+          } @else {
+            <path class="fill" [attr.d]="c.fill" />
+            <path class="line" [attr.d]="c.line" />
+          }
+          @for (hit of c.hits; track $index) {
+            <rect class="hit" [attr.x]="hit.x" y="0" [attr.width]="hit.w" [attr.height]="spark.h"><title>{{ hit.label }}</title></rect>
+          }
+        </svg>
+      </div>
+    </div>
+  }
+</section>
+
+<section class="row">
+  <div class="dash-card" id="appt-stats">
+    <div class="dash-card-head">
+      <h2>Appointment statistics</h2>
+      <small>{{ monthly().isSample ? 'Sample data · no bookings yet' : 'Last 6 months' }}</small>
+    </div>
+    <app-appt-chart [data]="monthly().data" />
+  </div>
+
+  <div class="dash-card" id="calendar">
+    <div class="dash-card-head">
+      <h2>Appointments</h2>
+      @if (isSampleCalendar()) {
+        <small>Sample</small>
+      }
+    </div>
+    <div class="cal-nav">
+      <button type="button" aria-label="Previous month" (click)="shiftMonth(-1)"><mat-icon>chevron_left</mat-icon></button>
+      <strong>{{ monthLabel() }}</strong>
+      <button type="button" aria-label="Next month" (click)="shiftMonth(1)"><mat-icon>chevron_right</mat-icon></button>
+    </div>
+    <div class="cal">
+      @for (w of weekdays; track w) {
+        <span class="wd">{{ w }}</span>
+      }
+      @for (cell of calendar(); track $index) {
+        @if (cell) {
+          <button
+            type="button"
+            class="day"
+            [class.today]="cell.today"
+            [class.sel]="selected() === cell.key"
+            [attr.aria-label]="cell.day + ', ' + cell.count + ' appointments'"
+            (click)="selected.set(cell.key)"
+          >
+            {{ cell.day }}
+            @if (cell.count) {
+              <i></i>
+            }
+          </button>
+        } @else {
+          <span></span>
+        }
+      }
+    </div>
+    <p class="cal-info">
+      @if (selectedInfo(); as info) {
+        <strong>{{ info.count }}</strong> appointment{{ info.count === 1 ? '' : 's' }} on {{ info.date }}
+      } @else {
+        Select a day to see its bookings.
+      }
+    </p>
+  </div>
+</section>
+
+<section class="row">
+  <div class="dash-card" id="recent-users">
+    <div class="dash-card-head">
+      <h2>Recent registrations</h2>
+      <small>Patients {{ stats()?.patients ?? 0 }} · Doctors {{ stats()?.doctors ?? 0 }} · Admins {{ stats()?.admins ?? 0 }}</small>
+    </div>
+    <div class="dash-table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th></tr>
+        </thead>
+        <tbody>
+          @for (u of stats()?.recentUsers ?? []; track u.id) {
+            <tr>
+              <td>{{ u.name }}</td>
+              <td>{{ u.email }}</td>
+              <td><span class="status-pill" [class]="u.role">{{ u.role }}</span></td>
+              <td>{{ shortDate(u.createdAt) }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4">{{ stats() ? 'No users yet.' : 'Loading…' }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="dash-card" id="departments-overview">
+    <div class="dash-card-head">
+      <h2>Departments</h2>
+      <small>{{ departments.length }} active</small>
+    </div>
+    @for (d of departments; track d.slug) {
+      <div class="list-row dept" [style]="accentVars(d)">
+        <span class="dept-icon"><mat-icon>{{ d.icon }}</mat-icon></span>
+        <div>
+          <strong>{{ d.title }}</strong>
+          <small>{{ d.hours }}</small>
+        </div>
+        <small class="count">{{ d.doctors.length }} doctors</small>
+      </div>
+    }
+  </div>
+</section>
+  }
+}

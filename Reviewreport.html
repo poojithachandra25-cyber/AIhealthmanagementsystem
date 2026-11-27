@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MedPoint Page Review</title>
+<meta name="description" content="Code review of every page, route and screen in the MedPoint Hospital Management System." />
+<style>
+  :root {
+    --bg: #f5f7fa;
+    --surface: #ffffff;
+    --ink: #0f172a;
+    --ink-soft: #475569;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --accent: #0f766e;
+    --accent-soft: #e6f4f1;
+    --code-bg: #f1f5f9;
+    --critical: #9f1239; --critical-bg: #ffe4e6;
+    --high: #b91c1c;     --high-bg: #fee2e2;
+    --medium: #b45309;   --medium-bg: #fef3c7;
+    --low: #1d4ed8;      --low-bg: #dbeafe;
+    --good: #166534;     --good-bg: #dcfce7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b1220; --surface: #111a2b; --ink: #e2e8f0; --ink-soft: #cbd5e1; --muted: #94a3b8;
+      --line: #23304a; --accent: #2dd4bf; --accent-soft: #123b38; --code-bg: #1a2438;
+      --critical: #fda4af; --critical-bg: #4c0519; --high: #fca5a5; --high-bg: #450a0a;
+      --medium: #fcd34d; --medium-bg: #422006; --low: #93c5fd; --low-bg: #172554;
+      --good: #86efac; --good-bg: #052e16;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b1220; --surface: #111a2b; --ink: #e2e8f0; --ink-soft: #cbd5e1; --muted: #94a3b8;
+    --line: #23304a; --accent: #2dd4bf; --accent-soft: #123b38; --code-bg: #1a2438;
+    --critical: #fda4af; --critical-bg: #4c0519; --high: #fca5a5; --high-bg: #450a0a;
+    --medium: #fcd34d; --medium-bg: #422006; --low: #93c5fd; --low-bg: #172554;
+    --good: #86efac; --good-bg: #052e16;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 32px 16px 64px; }
+  header.top { margin-bottom: 28px; }
+  .eyebrow { color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  h1 { margin: 6px 0 8px; font-size: 30px; letter-spacing: -.02em; }
+  h2 { margin: 0 0 4px; font-size: 20px; letter-spacing: -.01em; }
+  h3 { margin: 0 0 10px; font-size: 16px; }
+  p { margin: 0 0 12px; }
+  .lead { color: var(--ink-soft); max-width: 760px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 20px; color: var(--muted); font-size: 13px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 18px;
+  }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .tile { border-radius: 12px; padding: 14px; border: 1px solid var(--line); background: var(--surface); }
+  .tile strong { display: block; font-size: 28px; line-height: 1.1; }
+  .tile span { font-size: 13px; font-weight: 700; }
+  .tile.critical { background: var(--critical-bg); color: var(--critical); border-color: transparent; }
+  .tile.high { background: var(--high-bg); color: var(--high); border-color: transparent; }
+  .tile.medium { background: var(--medium-bg); color: var(--medium); border-color: transparent; }
+  .tile.low { background: var(--low-bg); color: var(--low); border-color: transparent; }
+  .tile.good { background: var(--good-bg); color: var(--good); border-color: transparent; }
+  ol.top-fixes { margin: 0; padding-left: 20px; }
+  ol.top-fixes li { margin-bottom: 6px; }
+  code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font: 12.5px/1.5 Consolas, "Cascadia Code", monospace; word-break: break-word; }
+  .pill {
+    display: inline-block; padding: 2px 9px; border-radius: 999px;
+    font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap;
+  }
+  .pill.critical { background: var(--critical-bg); color: var(--critical); }
+  .pill.high { background: var(--high-bg); color: var(--high); }
+  .pill.medium { background: var(--medium-bg); color: var(--medium); }
+  .pill.low { background: var(--low-bg); color: var(--low); }
+  .pill.good { background: var(--good-bg); color: var(--good); }
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; }
+  nav.toc a {
+    padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface);
+    color: var(--ink-soft); font-size: 13px; font-weight: 600; text-decoration: none;
+  }
+  nav.toc a:hover { border-color: var(--accent); color: var(--accent); }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 4px 0 18px; }
+  .filters span { color: var(--muted); font-size: 13px; font-weight: 700; margin-right: 4px; }
+  .filters button {
+    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-soft); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  section.page { scroll-margin-top: 16px; }
+  .page-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+  .route { color: var(--muted); font-size: 13px; }
+  .files { color: var(--muted); font-size: 12.5px; margin-bottom: 12px; }
+  .good-list { margin: 0 0 14px; padding-left: 18px; color: var(--ink-soft); font-size: 14px; }
+  .good-list li { margin-bottom: 3px; }
+  .finding { border-top: 1px solid var(--line); padding: 14px 0 4px; }
+  .finding:first-of-type { border-top: 0; }
+  .finding-head { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 6px; }
+  .finding-head strong { font-size: 15px; }
+  .finding .id { color: var(--muted); font-size: 12px; font-weight: 700; margin-left: auto; white-space: nowrap; }
+  .finding dl { display: grid; grid-template-columns: 92px 1fr; gap: 4px 12px; margin: 0; font-size: 14px; }
+  .finding dt { color: var(--muted); font-weight: 700; font-size: 12.5px; padding-top: 1px; }
+  .finding dd { margin: 0; color: var(--ink-soft); }
+  .none { color: var(--good); font-weight: 600; font-size: 14px; margin: 0; }
+  .hidden { display: none; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  footer { color: var(--muted); font-size: 13px; margin-top: 28px; }
+  @media (max-width: 600px) {
+    h1 { font-size: 24px; }
+    .finding dl { grid-template-columns: 1fr; }
+    .finding dt { padding-top: 6px; }
+    .finding .id { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <span class="eyebrow">MedPoint · Hospital Management System</span>
+  <h1>Page Review Report</h1>
+  <p class="lead">
+    This report reviews every page, route and screen in the frontend: its components, templates,
+    styles and logic, plus the backend routes each page calls. Findings are ranked by severity.
+    Each one says what goes wrong, where in the code, and how to fix it.
+  </p>
+  <div class="meta">
+    <span><strong>Date:</strong> 20 Nov 2026</span>
+    <span><strong>Scope:</strong> 12 pages and screens · 8 routes · 4 dialogs · 9 API route files</span>
+    <span><strong>Stack:</strong> Angular 22 (standalone, zoneless) · Angular Material · Express 5 · MySQL</span>
+  </div>
+</header>
+
+<div class="card">
+  <h2>Summary</h2>
+  <p class="lead">The codebase follows a modern structure and works end to end. The most serious
+    problems are three account-security gaps and two broken navigation paths, all small to fix.</p>
+  <div class="grid">
+    <div class="tile critical"><strong>2</strong><span>Critical</span></div>
+    <div class="tile high"><strong>3</strong><span>High</span></div>
+    <div class="tile medium"><strong>11</strong><span>Medium</span></div>
+    <div class="tile low"><strong>28</strong><span>Low</span></div>
+    <div class="tile good"><strong>3 / 3</strong><span>Unit tests pass</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Fix these first</h2>
+  <ol class="top-fixes">
+    <li><strong>C1.</strong> Anyone can reset any account's password with only its email (<a href="#p-forgot">Forgot password</a>).</li>
+    <li><strong>C2 / H3.</strong> Anyone can register as Admin, or as a doctor who claims any unclaimed doctor profile. That doctor can then read patient contact details and write medical records (<a href="#p-signup">Sign up</a>).</li>
+    <li><strong>H1.</strong> Expired sessions are never detected. Users stay "logged in" on screens where every call fails (<a href="#p-shell">App shell</a>).</li>
+    <li><strong>H2.</strong> "Meet our specialists" on a department page sends the user to the home page (<a href="#p-dept-detail">Department detail</a>).</li>
+    <li><strong>M1.</strong> A signed-in patient who clicks "Book an Appointment" loses the chosen doctor (<a href="#p-dept-detail">Department detail</a>).</li>
+  </ol>
+</div>
+
+<div class="card">
+  <h2>Pages reviewed</h2>
+  <nav class="toc" aria-label="Pages">
+    <a href="#p-update-chatbot">New: website chatbot</a>
+    <a href="#p-update-uploads">New: lab report uploads</a>
+    <a href="#p-update-admin">New: admin screens</a>
+    <a href="#p-update-doctor">New: doctor screens</a>
+    <a href="#p-update-billing">New: patient billing screens</a>
+    <a href="#p-shell">App shell</a>
+    <a href="#p-home">Home</a>
+    <a href="#p-departments">Our Departments</a>
+    <a href="#p-dept-detail">Department detail</a>
+    <a href="#p-contact">Contact</a>
+    <a href="#p-login">Login</a>
+    <a href="#p-signup">Sign up</a>
+    <a href="#p-forgot">Forgot password</a>
+    <a href="#p-dash-shell">Dashboard shell</a>
+    <a href="#p-patient">Patient dashboard</a>
+    <a href="#p-doctor">Doctor dashboard</a>
+    <a href="#p-admin">Admin dashboard</a>
+  </nav>
+</div>
+
+<div class="filters" role="group" aria-label="Filter findings by severity">
+  <span>Show:</span>
+  <button type="button" data-filter="all" aria-pressed="true">All</button>
+  <button type="button" data-filter="critical" aria-pressed="false">Critical</button>
+  <button type="button" data-filter="high" aria-pressed="false">High</button>
+  <button type="button" data-filter="medium" aria-pressed="false">Medium</button>
+  <button type="button" data-filter="low" aria-pressed="false">Low</button>
+</div>
+
+<!-- ============ Update: website chatbot, 25 Nov 2026 ============ -->
+<section class="page card" id="p-update-chatbot">
+  <div class="page-head"><h2>Update · website chatbot</h2><span class="route">Reviewed 25 Nov 2026</span></div>
+  <div class="files">layout/chatbot/* · app.html · server: routes/chat.js, chat/knowledge.js, chat/basic.js</div>
+  <p class="lead">
+    A floating assistant on every page (<code>Specs/chatbot.md</code>). It answers from the hospital's own data,
+    with Claude (<code>claude-opus-5-5</code>) when the server has credentials, or with a keyword-based basic mode
+    otherwise.
+  </p>
+  <ul class="good-list">
+    <li>Answers are grounded in live MySQL data (departments, services, fees with GST, doctors, consulting hours) plus a written guide to the site's flows. The prompt forbids inventing details and points visitors to Contact when unsure.</li>
+    <li>Only public information goes into the prompt: no patient data, bills or appointments, so the bot can't leak them.</li>
+    <li>Safety: no diagnosis or medicine advice, an emergency redirect, prompt-injection guidance, and server-side refusal fallbacks (<code>fallbacks: "default"</code>).</li>
+    <li>The input is bounded (20 turns, 1000 characters per message) and the endpoint is rate-limited. The knowledge block is byte-stable for 5 minutes, so Claude's prompt cache gets hits.</li>
+    <li>If Claude is unreachable or the key is invalid, it falls back to basic mode, so the widget never dead-ends.</li>
+  </ul>
+
+  <article class="finding" data-sev="medium">
+    <div class="finding-head"><span class="pill medium">Medium</span><strong>A public AI endpoint needs stronger abuse limits</strong><span class="id">B1</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>routes/chat.js</code> (<code>rateLimited</code>)</dd>
+      <dt>Problem</dt><dd>Once an API key is set, every message costs money. The limit is per IP and held in memory, so it resets on restart, is shared by everyone behind one NAT, and doesn't cap total daily spend.</dd>
+      <dt>Fix</dt><dd>Move the limit to a shared store, such as a MySQL table, with a daily message cap. Consider requiring sign-in or a CAPTCHA for long conversations, and set a spend limit on the Anthropic account.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Basic mode only understands fixed keywords</strong><span class="id">B2</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>chat/basic.js</code></dd>
+      <dt>Problem</dt><dd>Phrasings outside its keyword lists get the generic "I'm not sure" reply. It's meant only as a fallback.</dd>
+      <dt>Fix</dt><dd>Set <code>ANTHROPIC_API_KEY</code> so Claude answers, and keep basic mode for outages.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>The spec's MCP option isn't used</strong><span class="id">B3</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>routes/chat.js</code></dd>
+      <dt>Problem</dt><dd>The Claude API's MCP connector can only reach MCP servers at a public HTTPS address. This app's data is on localhost, so the hospital facts go into the prompt instead. That is simpler and suits a dataset of this size.</dd>
+      <dt>Fix</dt><dd>Once the API is deployed publicly, expose the same lookups (doctors, slots, fees) as a remote MCP server and attach it with the <code>mcp-client</code> beta, so the bot can answer live slot questions.</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ Update: patient lab report uploads, 25 Nov 2026 ============ -->
+<section class="page card" id="p-update-uploads">
+  <div class="page-head"><h2>Update · patient lab report uploads</h2><span class="route">Reviewed 25 Nov 2026</span></div>
+  <div class="files">patient/report-uploads/* · core/files.ts · doctor/case-dialog (Reports tab) · server: routes/records.js, routes/doctor-cases.js, utils/uploads.js</div>
+  <p class="lead">Patients upload their own lab reports on Medical Records. Doctors with an appointment see them in View / Update → Reports.</p>
+  <ul class="good-list">
+    <li>The file type is checked by its content (magic bytes), not by name or the browser's claim. A text file renamed to .pdf is rejected.</li>
+    <li>The 5 MB limit is enforced in the browser and on the server, and only the upload route accepts large request bodies.</li>
+    <li>Files are served with <code>X-Content-Type-Options: nosniff</code>, <code>no-store</code> caching and a cleaned file name. Doctor access goes through their own appointment with the patient.</li>
+  </ul>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Files are stored in the database, and nothing scans them for malware</strong><span class="id">U1</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>patient_reports.data</code> (LONGBLOB), <code>utils/uploads.js</code></dd>
+      <dt>Problem</dt><dd>That's fine at demo scale, but database backups grow with every upload, and a PDF that passes the type check could still carry malicious content when a doctor opens it.</dd>
+      <dt>Fix</dt><dd>For production, move files to object storage (database row → storage key), scan uploads, and set a per-patient storage quota.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Doctors keep access to uploads after an appointment is cancelled</strong><span class="id">U2</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>routes/doctor-cases.js</code> (<code>/uploads/:reportId/file</code>)</dd>
+      <dt>Problem</dt><dd>Access is scoped through the appointment, but a cancelled appointment still grants it (the same pattern as D1).</dd>
+      <dt>Fix</dt><dd>Require the appointment to be pending, confirmed or completed.</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ Update: admin dashboard, 22 Nov 2026 ============ -->
+<section class="page card" id="p-update-admin">
+  <div class="page-head"><h2>Update · new admin screens</h2><span class="route">Reviewed 22 Nov 2026</span></div>
+  <div class="files">
+    admin/doctors-view/* · admin/doctor-form-dialog/* · admin/patients-view/* · admin/revenue-view/* ·
+    admin/admin.api.ts · server routes: admin.js, auth.js (doctor sign-up), doctor-portal.js (linkByEmail)
+  </div>
+  <p class="lead">
+    Added for <code>Specs/admindashboard.md</code>: a side menu of Dashboard, Doctors, Patients, Revenue and Logout; an inline-editable
+    doctors grid with Add doctor; patients with their appointments; and a revenue dashboard built from bill payments.
+    Doctor sign-up is now <strong>email-based</strong>: an account links only to the profile the admin registered with that email.
+  </p>
+  <ul class="good-list">
+    <li><strong>Fixes H3:</strong> nobody can claim a doctor's identity by picking a profile any more. Linking needs the email the admin registered, and the public <code>/api/doctors/profiles</code> list and <code>POST /api/doctor/link</code> are gone.</li>
+    <li>Changing a doctor's email updates the linked account's login email in the same transaction, and emails are unique across doctors and users.</li>
+    <li>Every <code>/api/admin</code> route requires the admin role (tested: a patient token gets 403).</li>
+    <li>The revenue charts follow the dataviz method:
+      <ul>
+        <li>single-series columns and bars in one hue, with no legend</li>
+        <li>a validated three-slot segmented bar whose legend prints each name and amount, as the aqua contrast warning requires</li>
+        <li>columns at most 24px wide with 4px rounded tops, a tooltip on every column, and a "View as table" option</li>
+      </ul>
+    </li>
+  </ul>
+
+  <article class="finding" data-sev="medium">
+    <div class="finding-head"><span class="pill medium">Medium</span><strong>Doctors the admin adds don't appear on the public department pages</strong><span class="id">A1</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>core/departments.data.ts</code> (static) vs <code>doctors</code> table</dd>
+      <dt>Problem</dt><dd>Patients can book a new doctor from the dashboard, which reads MySQL. But the navbar dropdown and the <code>/departments/:slug</code> pages still read the static file, so new doctors and edited names or titles don't show there. This makes M5 more urgent.</dd>
+      <dt>Fix</dt><dd>Add <code>GET /api/departments</code> (with doctors) and switch the public pages to it.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Doctors can't be deactivated</strong><span class="id">A2</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>routes/admin.js</code></dd>
+      <dt>Problem</dt><dd>The admin can add and edit doctors but not retire one. A departing doctor stays bookable.</dd>
+      <dt>Fix</dt><dd>Add an <code>active</code> flag: hide inactive doctors from booking and keep their history.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Refunds remove revenue from the month it was earned</strong><span class="id">A3</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>routes/admin.js</code> (<code>GET /revenue</code>)</dd>
+      <dt>Problem</dt><dd>A refund flips the bill to <code>refunded</code>, so its payment disappears from that month's revenue. Past months change after the fact.</dd>
+      <dt>Fix</dt><dd>Record payments and refunds as separate ledger rows with their own dates, and report gross, refunds and net per month.</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ Update: doctor dashboard, 22 Nov 2026 ============ -->
+<section class="page card" id="p-update-doctor">
+  <div class="page-head"><h2>Update · new doctor screens</h2><span class="route">Reviewed 22 Nov 2026</span></div>
+  <div class="files">
+    doctor/appointments-view/* · doctor/patients-view/* · doctor/availability-view/* · doctor/profile-view/* ·
+    doctor/case-dialog/* · doctor/prescription-form/* · doctor/doctor.store.ts · server routes: doctor-portal.js,
+    doctor-cases.js · utils/doctor-context.js
+  </div>
+  <p class="lead">
+    Added for <code>Specs/doctordashboard.md</code>: a side menu of Dashboard, My Appointments, Patients, Availability,
+    Profile and Logout; View and Update pop-ups (Visit · Reports · History · Prescription); a <code>missed</code> status;
+    an editable weekly availability; and a profile with credentials managed by the admin.
+  </p>
+  <ul class="good-list">
+    <li>Every doctor endpoint goes through <code>withProfile</code>, and every appointment lookup is limited to the doctor's own appointments.</li>
+    <li>Saving a consultation is one transaction that replaces its medicines and the records generated from it, so saving twice never duplicates records for the patient.</li>
+    <li>Status rules are enforced on the server: <code>missed</code> only after the slot's time, <code>completed</code> never for a future visit, and no prescription before the appointment is confirmed.</li>
+    <li>Saving availability replaces the week in one transaction and reports how many booked appointments now fall outside the hours. Those bookings are kept, not dropped.</li>
+  </ul>
+
+  <article class="finding" data-sev="medium">
+    <div class="finding-head"><span class="pill medium">Medium</span><strong>One booking gives a doctor every record the patient has</strong><span class="id">D1</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>routes/doctor-cases.js</code> (<code>GET /appointments/:id/case</code>)</dd>
+      <dt>Problem</dt><dd>The case file returns the patient's medical records from <em>all</em> doctors, even if the only booking with this doctor was cancelled. Combined with H3 (anyone can claim a doctor profile), this widens who can read a patient's history.</dd>
+      <dt>Fix</dt><dd>Show other doctors' records only while the doctor has a pending, confirmed or completed visit with the patient. Log each case-file read for auditing.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Patients aren't told when new hours leave their booking outside the schedule</strong><span class="id">D2</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>routes/doctor-portal.js</code> (<code>PUT /availability</code>)</dd>
+      <dt>Problem</dt><dd>Only the doctor sees the count of affected bookings. Those patients still expect a visit the doctor no longer plans for.</dd>
+      <dt>Fix</dt><dd>List the affected bookings to the doctor with one-click Cancel (which refunds), or notify the patients.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>The admin chart doesn't count missed visits</strong><span class="id">D3</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>admin/admin-dashboard.ts</code> (<code>monthly</code>)</dd>
+      <dt>Problem</dt><dd>The new <code>missed</code> status isn't in the Completed, Upcoming or Cancelled series, so the totals undercount.</dd>
+      <dt>Fix</dt><dd>Add a fourth "Missed" series, or fold it into Cancelled with a note.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Prescriptions can be edited with no history</strong><span class="id">D4</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>routes/doctor-cases.js</code> (<code>PUT /consultation</code>)</dd>
+      <dt>Problem</dt><dd>Saving again overwrites the earlier prescription, and the patient's records change without any note. For medical records, an audit trail is normally expected.</dd>
+      <dt>Fix</dt><dd>Keep previous versions (for example, a <code>consultation_versions</code> table), or lock a consultation once the visit is completed and allow only addenda.</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ Update: 22 Nov 2026 ============ -->
+<section class="page card" id="p-update-billing">
+  <div class="page-head"><h2>Update · new patient screens</h2><span class="route">Reviewed 22 Nov 2026</span></div>
+  <div class="files">
+    patient/appointments-view/* · patient/records-view/* · patient/billing-view/* · patient/pay-dialog/* ·
+    patient/profile-view/* · patient/patient.store.ts · patient/pdf.ts · server routes: bills.js, profile.js ·
+    utils/billing.js
+  </div>
+  <p class="lead">
+    Added for the revised <code>Specs/patientdashboard.md</code>: each side-menu view is now its own screen
+    (<code>?view=mappointments</code>, <code>records</code>, <code>billing</code>, <code>profile</code>), with
+    department fees, GST billing, a dummy payment gateway, invoice and record PDFs, and an editable profile.
+  </p>
+  <ul class="good-list">
+    <li>Booking and its bill are created in one transaction, so a booking can never exist without a bill.</li>
+    <li>A cancellation and its bill settlement also run in one transaction: a paid bill becomes Refunded, an unpaid one Cancelled. This covers both patient and doctor cancels. Paying twice is rejected under a row lock.</li>
+    <li>The gateway validates card numbers (Luhn), expiry, CVV, UPI IDs and banks on the server. It stores only masked details (<code>Visa •••• 4242</code>), never the full card number or the CVV.</li>
+    <li>One component-scoped <code>PatientStore</code> feeds every view, so a payment or cancellation shows up everywhere without reloading.</li>
+    <li>jsPDF loads on demand in its own chunk, so the initial bundle didn't grow.</li>
+    <li>Profile updates are validated on both sides, and changing the email checks that no other account uses it.</li>
+  </ul>
+
+  <article class="finding" data-sev="medium">
+    <div class="finding-head"><span class="pill medium">Medium</span><strong>Doctors can't see whether a booking has been paid</strong><span class="id">N1</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>doctor/doctor-dashboard.html</code>, <code>routes/doctor-portal.js</code> (<code>APPOINTMENT_SELECT</code>)</dd>
+      <dt>Problem</dt><dd>The doctor's table has no payment column, so a doctor may confirm or complete a visit that was never paid for.</dd>
+      <dt>Fix</dt><dd>Join <code>bills.status</code> into the doctor query and show the same Success/Pending/Failed pill. Optionally, require payment before Confirm is offered.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Unpaid bookings hold their slot indefinitely</strong><span class="id">N2</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>routes/appointments.js</code>, <code>utils/billing.js</code></dd>
+      <dt>Problem</dt><dd>A patient who books and then closes the payment pop-up keeps the slot, and other patients can't take it.</dd>
+      <dt>Fix</dt><dd>Release unpaid bookings after a grace period (for example, 30 minutes, or 24 hours before the visit) with a scheduled job, and tell the patient.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>PDFs show "INR" instead of the ₹ sign</strong><span class="id">N3</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>patient/pdf.ts</code></dd>
+      <dt>Problem</dt><dd>jsPDF's built-in Helvetica has no ₹ glyph, so invoices print "INR 944.00".</dd>
+      <dt>Fix</dt><dd>If the symbol is required, embed a Unicode TTF (for example, Noto Sans) with <code>addFileToVFS</code> / <code>addFont</code>.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>The dummy gateway and the GST rate are demo settings</strong><span class="id">N4</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>utils/billing.js</code> (<code>payDummy</code>), <code>config.js</code> (<code>GST_RATE</code>)</dd>
+      <dt>Problem</dt><dd>No real payment provider is involved, and 18% GST is applied to consultations, as the spec asked. Many clinical services are GST-exempt in practice.</dd>
+      <dt>Fix</dt><dd>Swap <code>payDummy()</code> for a real gateway SDK before going live, and confirm the tax treatment. The rate is already configurable through <code>GST_RATE</code>.</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ App shell ============ -->
+<section class="page card" id="p-shell">
+  <div class="page-head"><h2>App shell, routing &amp; navigation</h2><span class="route">All routes</span></div>
+  <div class="files">app.ts · app.html · app.scss · app.routes.ts · core/auth.guard.ts · core/auth.service.ts · core/api.ts · layout/dept-dropdown/*</div>
+  <ul class="good-list">
+    <li>All routes are lazy <code>loadComponent</code> routes with page titles, and guard the auth pages and the dashboard.</li>
+    <li>The departments dropdown opens on hover, click and keyboard focus. It closes on Escape and on outside clicks, and sets <code>aria-expanded</code>.</li>
+    <li>Below 860px the navbar collapses into a Material menu with a departments sub-menu.</li>
+  </ul>
+
+  <article class="finding" data-sev="high">
+    <div class="finding-head"><span class="pill high">High</span><strong>Expired sessions are never handled</strong><span class="id">H1 · fixed 25 Nov</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>core/auth.service.ts:72</code> (<code>restore()</code>), <code>core/auth.guard.ts</code>, <code>core/api.ts:8</code></dd>
+      <dt>Problem</dt><dd>The JWT expires after 8 hours, but the stored user is restored from <code>localStorage</code> without checking the token's expiry. No axios response interceptor exists. After expiry, <code>authGuard</code> still lets the user into <code>/dashboard</code> and the navbar still shows them as signed in. Every API call then returns 401 "Session expired", so the dashboards show error cards with no path back to login.</dd>
+      <dt>Fix</dt><dd>Decode the token's <code>exp</code> in <code>restore()</code> and drop expired sessions. Also add an <code>api.interceptors.response</code> handler that, on 401, calls <code>auth.logout()</code> and redirects to <code>/login</code>.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Site header flashes on a direct dashboard load</strong><span class="id">L1</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>app.ts:44</code></dd>
+      <dt>Problem</dt><dd><code>isDashboard</code> starts as <code>false</code> until the first <code>NavigationEnd</code>. Reloading <code>/dashboard</code> briefly renders the public header and footer, then hides them.</dd>
+      <dt>Fix</dt><dd>Seed the initial value from <code>location.pathname.startsWith('/dashboard')</code>, or move the dashboard into its own layout route.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>No 404 page; unknown URLs silently go home</strong><span class="id">L2</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>app.routes.ts:51</code></dd>
+      <dt>Problem</dt><dd><code>{ path: '**', redirectTo: '' }</code> hides mistyped links. The user lands on Home with no explanation.</dd>
+      <dt>Fix</dt><dd>Add a small "Page not found" page. The department-detail "not found" banner already has a design to reuse.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Department pages all share one browser-tab title</strong><span class="id">L3</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>app.routes.ts:17</code></dd>
+      <dt>Problem</dt><dd>Every department tab reads "MedPoint HMS | Department", which hurts bookmarks, history and SEO.</dd>
+      <dt>Fix</dt><dd>Use a title resolver (or <code>Title.setTitle</code> in the component) that uses the department's name.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Footer "Privacy" and "Terms" link to the Contact page</strong><span class="id">L7</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>app.html:104</code>, also <code>signup.html:151</code></dd>
+      <dt>Problem</dt><dd>These are placeholders. A user who must accept the terms at Sign up has no terms to read.</dd>
+      <dt>Fix</dt><dd>Add simple Privacy and Terms pages, or remove the links until they exist.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Initial bundle exceeds its size budget</strong><span class="id">L16</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>angular.json</code> budgets; production build output</dd>
+      <dt>Problem</dt><dd>The production build warns that the initial bundle is 594 kB, over the 500 kB budget. Material modules imported by the shell (toolbar, menu, snackbar) all land in the first download.</dd>
+      <dt>Fix</dt><dd>Check the initial chunks with <code>ng build --stats-json</code>. Consider moving the snackbar service import behind first use. If 594 kB is acceptable, raise the budget deliberately.</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ Home ============ -->
+<section class="page card" id="p-home">
+  <div class="page-head"><h2>Home (with About Us)</h2><span class="route"><code>/</code> · anchor <code>#about</code></span></div>
+  <div class="files">pages/home/home.* · pages/home/about-section/*</div>
+  <ul class="good-list">
+    <li>A clear hero, role cards, steps and a call-to-action band. Layout comes from the shared <code>.section</code>, <code>.card-grid</code> and <code>.info-card</code> classes.</li>
+    <li>The About Us content lives here, as the project instructions require.</li>
+  </ul>
+
+  <article class="finding" data-sev="medium">
+    <div class="finding-head"><span class="pill medium">Medium</span><strong>"Quick booking" card is static and discards the user's choice</strong><span class="id">M4</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>home.ts:26</code>, <code>home.html:54</code> and <code>:60</code></dd>
+      <dt>Problem</dt><dd>The card shows Dr. Sarah Lee with slots 09:30 / 11:00 / 14:15. In the database she consults Tue/Thu/Sat 10:00–14:00, so 09:30 and 14:15 can never be booked. "Continue to book at 11:00" links to plain <code>/login</code>, so the doctor and slot the user picked are lost.</dd>
+      <dt>Fix</dt><dd>Pass the doctor through, as the department pages do: <code>[queryParams]="{ doctor: 'Dr. Sarah Lee' }"</code>, so the booking dialog opens after login. Either load real slots from <code>GET /api/doctors/:id/slots</code> or label the card clearly as an illustration.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>About Us statistics contradict the site's own data</strong><span class="id">L6</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>about-section.ts:14</code></dd>
+      <dt>Problem</dt><dd>"120+ specialist doctors" sits next to a Departments page that lists 18 specialists.</dd>
+      <dt>Fix</dt><dd>Derive the number from <code>DEPARTMENTS</code>, or reword it (for example, "120+ clinical staff").</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ Departments ============ -->
+<section class="page card" id="p-departments">
+  <div class="page-head"><h2>Our Departments</h2><span class="route"><code>/departments</code></span></div>
+  <div class="files">pages/departments/departments.* · pages/departments/dept-card/*</div>
+  <ul class="good-list">
+    <li>Instant search across department names, services and doctors, with an empty state and a clear button.</li>
+    <li>Department cards use per-department accent variables, and white text sits on the darker stop as required.</li>
+  </ul>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Doctor avatars on department cards have no image fallback</strong><span class="id">L4</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>dept-card.html:22</code></dd>
+      <dt>Problem</dt><dd>Portraits come from <code>randomuser.me</code>. If that service is slow or blocked, the cards show broken-image icons. The doctor card and booking cards already fall back to initials, but this one doesn't.</dd>
+      <dt>Fix</dt><dd>Reuse the same <code>(error)</code> → initials pattern, or hide failed images.</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ Department detail ============ -->
+<section class="page card" id="p-dept-detail">
+  <div class="page-head"><h2>Department detail</h2><span class="route"><code>/departments/:slug</code></span></div>
+  <div class="files">pages/department-detail/department-detail.* · pages/department-detail/doctor-card/*</div>
+  <ul class="good-list">
+    <li>The <code>slug</code> binds straight to an <code>input()</code> through <code>withComponentInputBinding()</code>, with a "not found" state for bad slugs.</li>
+    <li>Doctor cards fall back to initials when a photo fails, and use descriptive <code>alt</code> text.</li>
+  </ul>
+
+  <article class="finding" data-sev="high">
+    <div class="finding-head"><span class="pill high">High</span><strong>"Meet our specialists" navigates to the home page</strong><span class="id">H2</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>department-detail.html:26</code></dd>
+      <dt>Problem</dt><dd><code>href="#doctors"</code> resolves against <code>&lt;base href="/"&gt;</code> to <code>/#doctors</code>. That's a different document from <code>/departments/cardiology</code>, so clicking it does a full page load of Home instead of scrolling to the doctors.</dd>
+      <dt>Fix</dt><dd>Use the router: <code>&lt;a routerLink="." fragment="doctors"&gt;</code>. <code>anchorScrolling</code> is already enabled in <code>app.config.ts</code>.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="medium">
+    <div class="finding-head"><span class="pill medium">Medium</span><strong>Signed-in patients lose the doctor when they click "Book an Appointment"</strong><span class="id">M1</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>doctor-card.html:42</code>, <code>core/auth.guard.ts:14</code></dd>
+      <dt>Problem</dt><dd>The button always links to <code>/login?doctor=…</code>. For a signed-in user, <code>guestGuard</code> redirects to plain <code>/dashboard</code> and drops the query params, so the booking form never opens.</dd>
+      <dt>Fix</dt><dd>When the user is a signed-in patient, link straight to <code>/dashboard?view=book&amp;doctor=…</code>. Alternatively, have <code>guestGuard</code> forward <code>doctor</code> into the dashboard URL.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="medium">
+    <div class="finding-head"><span class="pill medium">Medium</span><strong>Doctor ratings, reviews and statistics are made up</strong><span class="id">M3</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>doctor-card.html:19–21</code>, <code>core/departments.data.ts:172</code> (<code>doctorProfile()</code>)</dd>
+      <dt>Problem</dt><dd>The rating, review count, patients, publications and consultations are computed from the length of the doctor's name and their years of experience. Every card also says "Available for appointments", even though real consulting days now live in <code>doctor_availability</code>. On a healthcare site, numbers that look real but aren't mislead patients.</dd>
+      <dt>Fix</dt><dd>Remove the made-up metrics, or label them as sample content. Show real consulting days from <code>GET /api/doctors</code>, as the booking cards do.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="medium">
+    <div class="finding-head"><span class="pill medium">Medium</span><strong>Public pages and booking read doctor data from different places</strong><span class="id">M5</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>core/departments.data.ts</code> and <code>server/src/db/seed-data.js</code></dd>
+      <dt>Problem</dt><dd>The department pages, the navbar and the Sign up specialization list read the static TypeScript file. Booking, sign-up profile linking and dashboards read MySQL. Any change to the database, such as a new doctor or a renamed title, won't appear on the public pages. Name-based matching (<code>?doctor=</code>) then breaks silently.</dd>
+      <dt>Fix</dt><dd>Add <code>GET /api/departments</code> and load the public pages from it, keeping the static file only as a loading placeholder. Pass doctor ids rather than names between pages.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Invalid description-list order in the highlights</strong><span class="id">L5</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>department-detail.html:35</code></dd>
+      <dt>Problem</dt><dd>Each group puts <code>&lt;dd&gt;</code> before <code>&lt;dt&gt;</code>. That's invalid HTML, so screen readers announce the value before its label.</dd>
+      <dt>Fix</dt><dd>Put <code>&lt;dt&gt;</code> first and use CSS (<code>order</code> or <code>flex-direction: column-reverse</code>) to show the number on top.</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ Contact ============ -->
+<section class="page card" id="p-contact">
+  <div class="page-head"><h2>Contact</h2><span class="route"><code>/contact</code></span></div>
+  <div class="files">pages/contact/contact.* · server/src/routes/contact.js</div>
+  <ul class="good-list">
+    <li>A reactive form with field-level errors, a spinner while sending, and snackbar feedback.</li>
+  </ul>
+
+  <article class="finding" data-sev="medium">
+    <div class="finding-head"><span class="pill medium">Medium</span><strong>The form shows red errors right after a successful send</strong><span class="id">M2</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>contact.ts:57</code></dd>
+      <dt>Problem</dt><dd><code>this.form.reset()</code> empties the fields, but the <code>FormGroupDirective</code> stays <code>submitted</code>. Material's error matcher shows errors for invalid controls on a submitted form, so after "Thanks!" every required field turns red.</dd>
+      <dt>Fix</dt><dd>Reset through the directive: take <code>#f="ngForm"</code> (or <code>viewChild(FormGroupDirective)</code>) and call <code>f.resetForm()</code>.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="medium">
+    <div class="finding-head"><span class="pill medium">Medium</span><strong>The contact API trusts its input: long values cause a 500</strong><span class="id">M6</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>server/src/routes/contact.js:13</code></dd>
+      <dt>Problem</dt><dd>The server checks neither the email format nor any lengths. A name over 120 characters or a subject over 200 overflows the column. In MySQL strict mode, the user then gets "Something went wrong on our side" instead of a useful message. Because the route is unauthenticated, it can also be used to fill the table.</dd>
+      <dt>Fix</dt><dd>Validate the email and the lengths (name ≤ 120, subject ≤ 200, message ≤ 5000) on the server, with matching <code>maxlength</code> in the form. Add basic rate limiting.</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ Login ============ -->
+<section class="page card" id="p-login">
+  <div class="page-head"><h2>Login</h2><span class="route"><code>/login</code> · <code>guestGuard</code></span></div>
+  <div class="files">pages/auth/login/* · pages/auth/auth.scss · pages/auth/roles.ts · server/src/routes/auth.js</div>
+  <ul class="good-list">
+    <li>The role picker is a proper <code>radiogroup</code> with <code>aria-checked</code>. The password toggle has an accessible label.</li>
+    <li>When the user arrives from a doctor's Book button, the page names the doctor, and patients go straight to that doctor's booking form after signing in.</li>
+    <li>The server returns the same "Invalid email or password" message for an unknown email and a wrong password, so accounts can't be enumerated through the password check.</li>
+  </ul>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Weak password rules and no rate limiting on login</strong><span class="id">L15</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>server/src/routes/auth.js:43</code> and <code>:108</code></dd>
+      <dt>Problem</dt><dd>Six-character passwords are accepted, and <code>/api/auth/login</code> accepts unlimited attempts. That combination makes guessing passwords practical.</dd>
+      <dt>Fix</dt><dd>Require at least 8 characters, and add <code>express-rate-limit</code> to the auth routes.</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ Sign up ============ -->
+<section class="page card" id="p-signup">
+  <div class="page-head"><h2>Sign up</h2><span class="route"><code>/signup</code> · <code>guestGuard</code></span></div>
+  <div class="files">pages/auth/signup/* · server/src/routes/auth.js · server/src/routes/doctor-portal.js</div>
+  <ul class="good-list">
+    <li>Validators switch with the selected role. Doctors must pick a specialization and a profile, and profiles that already have an account are disabled.</li>
+    <li>Registration claims the profile inside a transaction with <code>FOR UPDATE</code>, so two sign-ups can't claim the same doctor.</li>
+  </ul>
+
+  <article class="finding" data-sev="critical">
+    <div class="finding-head"><span class="pill critical">Critical</span><strong>Anyone can register as an Admin</strong><span class="id">C2</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>server/src/routes/auth.js:36</code> (marked <code>NOTE:</code>)</dd>
+      <dt>Problem</dt><dd><code>Specs/layout.md</code> requires this for the demo, but it means any visitor can get admin access to hospital statistics, every user's name and email, and all contact messages.</dd>
+      <dt>Fix</dt><dd>Before real use, remove Admin from public sign-up. Create admins from the command line or let an existing admin invite them.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="high">
+    <div class="finding-head"><span class="pill high">High</span><strong>Anyone can claim a doctor's identity and see their patients</strong><span class="id">H3 · fixed 22 Nov</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>server/src/routes/auth.js</code> (doctor registration), <code>server/src/routes/doctor-portal.js:71</code> (<code>POST /link</code>)</dd>
+      <dt>Problem</dt><dd>Nothing checks that the person signing up really is the doctor. Anyone can claim an unclaimed profile, such as "Dr. Sarah Lee". They then see the names, emails and phone numbers of every patient who booked her, can confirm or cancel those visits, and can write medical records into those patients' files.</dd>
+      <dt>Fix</dt><dd>Make claiming a profile need approval. Either an admin approves pending links, or doctors register with an invite code issued for their profile. Until then, keep doctor accounts in a "pending" state with no patient access.</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ Forgot password ============ -->
+<section class="page card" id="p-forgot">
+  <div class="page-head"><h2>Forgot password</h2><span class="route"><code>/forgot-password</code> · <code>guestGuard</code></span></div>
+  <div class="files">pages/auth/forgot-password/* · server/src/routes/auth.js</div>
+  <ul class="good-list">
+    <li>It matches the Login and Sign up design, and checks that the two passwords match.</li>
+  </ul>
+
+  <article class="finding" data-sev="critical">
+    <div class="finding-head"><span class="pill critical">Critical</span><strong>Any account can be taken over with just its email address</strong><span class="id">C1</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>server/src/routes/auth.js:126–128</code> (marked <code>NOTE:</code>)</dd>
+      <dt>Problem</dt><dd><code>POST /api/auth/update-password</code> sets a new password for any email and role, with no proof of ownership. Anyone who knows or guesses a doctor's or admin's email can take over the account, including its patient data. The error messages ("No doctor account is registered with this email") also reveal which emails exist.</dd>
+      <dt>Fix</dt><dd>Use a reset-link flow: email a single-use, time-limited token; only the token holder can set the new password. Always reply "If that account exists, we've sent a link".</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ Dashboard shell ============ -->
+<section class="page card" id="p-dash-shell">
+  <div class="page-head"><h2>Dashboard shell</h2><span class="route"><code>/dashboard</code> · <code>authGuard</code></span></div>
+  <div class="files">pages/dashboard/dashboard.* · pages/dashboard/dashboard.data.ts · pages/dashboard/confirm-dialog.ts</div>
+  <ul class="good-list">
+    <li>One shell renders the patient, doctor or admin view by role. The sidebar navigation comes from data and collapses to a drawer on small screens.</li>
+    <li>The <code>?view=book</code> and <code>?doctor=</code> query params map to inputs, so booking links and the browser Back button work.</li>
+    <li>The cancel confirmation dialog is shared by patients and doctors, as the spec asks.</li>
+  </ul>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Sidebar scrolling relies on a fixed 400 ms wait</strong><span class="id">L8</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>dashboard.ts:96</code></dd>
+      <dt>Problem</dt><dd>Going from the booking view to a section waits 400 ms for the overview to render before scrolling. On a slow device the target may not exist yet, and nothing happens.</dd>
+      <dt>Fix</dt><dd>Navigate with <code>fragment: item.target</code> and let the router's <code>anchorScrolling</code> handle it, or scroll from an <code>afterNextRender</code> hook in the patient view.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Placeholder controls look like working features</strong><span class="id">L14</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>dashboard.ts:116</code> (bell), <code>dashboard.ts:16</code> (admin CTA), <code>dashboard.data.ts</code> (NAV)</dd>
+      <dt>Problem</dt><dd>The bell always says "You're all caught up". Billing, Messages and Profile &amp; Settings only show "coming soon". The admin's "Manage departments" button opens the public departments page.</dd>
+      <dt>Fix</dt><dd>Hide unfinished items or mark them visibly (a "Soon" badge). Point the admin button at an admin screen once one exists.</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ Patient ============ -->
+<section class="page card" id="p-patient">
+  <div class="page-head"><h2>Patient dashboard</h2><span class="route"><code>/dashboard</code> · <code>/dashboard?view=book</code></span></div>
+  <div class="files">patient/patient-dashboard.* · patient/book-appointment/* · patient/book-dialog/* · patient/patient.api.ts · server routes: appointments.js, doctors.js, records.js</div>
+  <ul class="good-list">
+    <li>It meets <code>Specs/patientdashboard.md</code>: doctor cards with available days and a Book button, a booking pop-up with type, date, slots and an optional reason, a cancel confirmation pop-up, and doctor-written medical records.</li>
+    <li>All data is live from MySQL, with loading, error and empty states. The server re-checks every booking under a row lock, so the same slot can't be booked twice.</li>
+    <li>The date picker only allows the doctor's consulting days. A late slot response is ignored if the user has already picked another date.</li>
+  </ul>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>The dashboard never refreshes while open</strong><span class="id">L9</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>patient.api.ts:82</code> (<code>isUpcoming</code> uses <code>nowStamp()</code>), <code>patient-dashboard.ts:118</code></dd>
+      <dt>Problem</dt><dd>Data loads once. The upcoming/past split reads the clock inside a <code>computed</code> that has no reason to recompute. An appointment stays "upcoming" after its time passes, and records or status changes a doctor makes only appear after a reload.</dd>
+      <dt>Fix</dt><dd>Add a "now" signal ticked every minute, and refresh on window focus (or add a Refresh button).</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Doctor preselection matches by name and stays in the URL</strong><span class="id">L10</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>book-appointment.ts:59</code></dd>
+      <dt>Problem</dt><dd><code>?doctor=Dr. Michael Kim</code> is matched by exact name, which is fragile (see M5). The parameter also stays in the URL, so reloading reopens the booking pop-up.</dd>
+      <dt>Fix</dt><dd>Pass <code>doctorId</code>, and clear the parameter with <code>router.navigate([], { queryParams: { doctor: null }, queryParamsHandling: 'merge' })</code> after opening.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Dates and slots assume one shared time zone</strong><span class="id">L11</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>book-dialog.ts:94</code>, <code>server/src/utils/schedule.js</code>, <code>doctor-portal.js:169</code> (<code>CURDATE()</code>)</dd>
+      <dt>Problem</dt><dd>The browser, the Node server and MySQL each use their own local time. That works on one machine, but with a hosted server or a patient in another zone, "today", past-slot checks and record dates disagree.</dd>
+      <dt>Fix</dt><dd>Store the hospital's time zone in config and compute "today" and "now" in that zone on the server. Show it in the booking pop-up.</dd>
+    </dl>
+  </article>
+</section>
+
+<!-- ============ Doctor ============ -->
+<section class="page card" id="p-doctor">
+  <div class="page-head"><h2>Doctor dashboard</h2><span class="route"><code>/dashboard</code> (doctor role)</span></div>
+  <div class="files">doctor/doctor-dashboard.* · doctor/records-dialog/* · doctor/doctor.api.ts · server/src/routes/doctor-portal.js</div>
+  <ul class="good-list">
+    <li>It meets <code>Specs/doctordashboard.md</code>: doctors see patient bookings, can confirm or cancel them, and can add medical records once a visit is confirmed. The records appear on the patient's dashboard.</li>
+    <li>Every doctor endpoint is limited to the doctor's own linked profile, and status changes follow an allow-list of transitions on the server.</li>
+    <li>An unlinked account gets a guided "Link your doctor profile" state instead of a blank screen. Deleting a record takes two clicks.</li>
+  </ul>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>Past appointments can still be confirmed, and visits completed early</strong><span class="id">L12</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>doctor-dashboard.ts:172</code> (<code>nextActions</code>), <code>doctor-portal.js</code> (<code>TRANSITIONS</code>)</dd>
+      <dt>Problem</dt><dd>A pending appointment whose time has passed still offers Confirm. Complete is offered at 08:00 for a 16:00 visit on the same day.</dd>
+      <dt>Fix</dt><dd>Hide Confirm once the slot has started, and offer Complete only after it starts. Mirror both rules on the server.</dd>
+    </dl>
+  </article>
+
+  <article class="finding" data-sev="low">
+    <div class="finding-head"><span class="pill low">Low</span><strong>The link card uses a native select</strong><span class="id">L13</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>doctor-dashboard.html:13</code></dd>
+      <dt>Problem</dt><dd>Every other form uses Material form fields. The native <code>&lt;select&gt;</code> looks different and has no visible label.</dd>
+      <dt>Fix</dt><dd>Use <code>mat-form-field</code> + <code>mat-select</code>, as Sign up does.</dd>
+    </dl>
+  </article>
+
+  <p class="files">See also <strong>H3</strong> under <a href="#p-signup">Sign up</a>: the link card lets any doctor account claim an unclaimed profile.</p>
+</section>
+
+<!-- ============ Admin ============ -->
+<section class="page card" id="p-admin">
+  <div class="page-head"><h2>Admin dashboard</h2><span class="route"><code>/dashboard</code> (admin role)</span></div>
+  <div class="files">admin/admin-dashboard.* · admin/appt-chart.ts · server/src/routes/stats.js</div>
+  <ul class="good-list">
+    <li>Live counts with 14-day trend sparklines, a hand-built accessible SVG chart, and a calendar. Sample data is clearly labelled when there are no bookings.</li>
+    <li><code>Specs/admindashboard.md</code> is empty, so there are no requirements to check against yet.</li>
+  </ul>
+
+  <article class="finding" data-sev="medium">
+    <div class="finding-head"><span class="pill medium">Medium</span><strong>"Joined" dates rely on non-standard date parsing</strong><span class="id">M7</span></div>
+    <dl>
+      <dt>Where</dt><dd><code>admin-dashboard.ts:44</code></dd>
+      <dt>Problem</dt><dd><code>createdAt</code> arrives as <code>"2026-11-20 10:48:08"</code> (the pool uses <code>dateStrings</code>). <code>new Date()</code> with a space instead of <code>T</code> isn't standard: how it's parsed depends on the browser, and some versions return <em>Invalid Date</em>.</dd>
+      <dt>Fix</dt><dd>Parse with <code>iso.replace(' ', 'T')</code> (as the patient profile card already does), or return ISO-8601 strings from the API.</dd>
+    </dl>
+  </article>
+</section>
+
+<div class="card">
+  <h2>Checks run for this review</h2>
+  <table>
+    <thead><tr><th>Check</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Production build (<code>npm run build</code>)</td><td><span class="pill good">Pass</span> with one warning: initial bundle budget (L16)</td></tr>
+      <tr><td>Component style budget (4 kB warning / 8 kB error)</td><td><span class="pill good">Pass</span> no component over budget</td></tr>
+      <tr><td>Unit tests (<code>npm test -- --watch=false</code>)</td><td><span class="pill good">Pass</span> 3 / 3. Coverage is thin: only the root component has a spec.</td></tr>
+      <tr><td>API smoke tests: booking, double-booking, cancel, confirm, records, profile claim</td><td><span class="pill good">Pass</span> rules enforced server-side</td></tr>
+      <tr><td>Manual browser walkthrough</td><td><span class="pill low">Not done</span> code reading and API tests only</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Recommended next steps</h2>
+  <ol class="top-fixes">
+    <li>Close the three account-security gaps (C1, C2, H3) before anyone outside the class uses the system.</li>
+    <li>Add a 401 interceptor and a token-expiry check (H1). This takes about 20 lines and removes a whole class of confusing failures.</li>
+    <li>Fix the two navigation bugs (H2, M1) and the contact form reset (M2). Each is a one-line change.</li>
+    <li>Serve departments and doctors from the API (M5), then remove the made-up doctor statistics (M3).</li>
+    <li>Add component tests for the booking dialog, the cancel flow and the doctor status actions.</li>
+  </ol>
+</div>
+
+<footer>
+  This report was generated by the project's <code>code-reviewer</code> skill (<code>.claude/skills/code-reviewer/skill.md</code>).
+  Line numbers refer to the code as of 20 Nov 2026.
+</footer>
+</div>
+
+<script>
+  (function () {
+    var buttons = document.querySelectorAll('.filters button');
+    var findings = document.querySelectorAll('.finding');
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var sev = btn.getAttribute('data-filter');
+        buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
+        findings.forEach(function (f) {
+          f.classList.toggle('hidden', sev !== 'all' && f.getAttribute('data-sev') !== sev);
+        });
+      });
+    });
+  })();
+</script>
+</body>
+</html>

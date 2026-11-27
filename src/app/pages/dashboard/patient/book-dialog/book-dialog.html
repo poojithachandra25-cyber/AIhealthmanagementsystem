@@ -1,0 +1,127 @@
+<header class="head" [style.--accent-1]="doctor.accentFrom" [style.--accent-2]="doctor.accentTo">
+  @if (doctor.image && !photoFailed()) {
+    <img [src]="doctor.image" [alt]="doctor.name" (error)="photoFailed.set(true)" />
+  } @else {
+    <span class="initials">{{ initials }}</span>
+  }
+  <div>
+    <h2 mat-dialog-title>Book with {{ doctor.name }}</h2>
+    <p>{{ doctor.title }} · {{ doctor.department }}</p>
+    <p class="days"><mat-icon>schedule</mat-icon>{{ days }} · {{ hours }}</p>
+  </div>
+  <button mat-icon-button mat-dialog-close aria-label="Close" class="close">
+    <mat-icon>close</mat-icon>
+  </button>
+</header>
+
+<mat-dialog-content>
+  <section>
+    <h3>Appointment type</h3>
+    <mat-button-toggle-group
+      class="type"
+      [value]="type()"
+      (change)="type.set($event.value)"
+      aria-label="Appointment type"
+    >
+      <mat-button-toggle value="regular"><mat-icon>event</mat-icon> Regular</mat-button-toggle>
+      <mat-button-toggle value="emergency"><mat-icon>emergency</mat-icon> Emergency</mat-button-toggle>
+    </mat-button-toggle-group>
+    @if (type() === 'emergency') {
+      <p class="warn">
+        <mat-icon>warning_amber</mat-icon>
+        For a life-threatening emergency, call +1 (800) 123-4567 or come straight to the ER.
+      </p>
+    }
+  </section>
+
+  <section>
+    <h3>Date</h3>
+    <mat-form-field appearance="outline" class="full" subscriptSizing="dynamic">
+      <mat-label>Select a date</mat-label>
+      <input
+        matInput
+        readonly
+        [matDatepicker]="picker"
+        [matDatepickerFilter]="isWorkDay"
+        [min]="minDate"
+        [max]="maxDate"
+        [value]="date()"
+        (dateChange)="pickDate($event.value)"
+        (click)="picker.open()"
+      />
+      <mat-datepicker-toggle matIconSuffix [for]="picker" />
+      <mat-datepicker #picker />
+      <mat-hint>Only the doctor's consulting days can be picked.</mat-hint>
+    </mat-form-field>
+  </section>
+
+  <section>
+    <h3>
+      Available slots
+      @if (date() && !loadingSlots() && slots().length) {
+        <small>{{ openSlots() }} of {{ slots().length }} free</small>
+      }
+    </h3>
+    @if (loadingSlots()) {
+      <div class="state"><mat-spinner diameter="22" /> Checking the doctor's calendar…</div>
+    } @else if (slotError()) {
+      <p class="state error">{{ slotError() }}</p>
+    } @else if (!date()) {
+      <p class="state">Pick a date to see the free time slots.</p>
+    } @else if (!openSlots()) {
+      <p class="state">No free slots left on this day. Please try another date.</p>
+    } @else {
+      <div class="slots" role="radiogroup" aria-label="Time slot">
+        @for (s of slots(); track s.time) {
+          <button
+            type="button"
+            role="radio"
+            [attr.aria-checked]="time() === s.time"
+            [class.selected]="time() === s.time"
+            [disabled]="!s.available"
+            (click)="time.set(s.time)"
+          >
+            {{ timeLabel(s.time) }}
+          </button>
+        }
+      </div>
+    }
+  </section>
+
+  <section>
+    <h3>Reason for visit <small>Optional</small></h3>
+    <mat-form-field appearance="outline" class="full" subscriptSizing="dynamic">
+      <mat-label>Describe your symptoms or the reason for this visit</mat-label>
+      <textarea
+        matInput
+        rows="3"
+        maxlength="255"
+        [value]="reason()"
+        (input)="reason.set($any($event.target).value)"
+      ></textarea>
+      <mat-hint align="end">{{ reason().length }}/255</mat-hint>
+    </mat-form-field>
+  </section>
+
+  <section class="charges" aria-label="Charges">
+    <div><span>{{ type() === 'emergency' ? 'Emergency' : 'Regular' }} consultation fee</span><strong>{{ money(charges().fee) }}</strong></div>
+    <div><span>GST ({{ gstRate }}%)</span><strong>{{ money(charges().gst) }}</strong></div>
+    <div class="total"><span>Total payable</span><strong>{{ money(charges().total) }}</strong></div>
+    <small>You'll pay on the next screen. Payments use a demo gateway.</small>
+  </section>
+
+  @if (error()) {
+    <p class="state error" role="alert">{{ error() }}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-flat-button [disabled]="!canSubmit()" (click)="submit()">
+    @if (saving()) {
+      <mat-spinner diameter="18" />
+    } @else {
+      Book Appointment
+    }
+  </button>
+</mat-dialog-actions>

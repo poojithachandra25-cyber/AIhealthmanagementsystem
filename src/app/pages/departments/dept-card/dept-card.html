@@ -1,0 +1,30 @@
+@let d = dept();
+<a class="dept" [routerLink]="['/departments', d.slug]" [style]="accent()">
+  <div class="dept-head">
+    <span class="dept-icon"><mat-icon>{{ d.icon }}</mat-icon></span>
+    <span class="hours"><mat-icon>schedule</mat-icon>{{ d.hours }}</span>
+    <h2>{{ d.title }}</h2>
+    <p class="tagline">{{ d.tagline }}</p>
+  </div>
+
+  <div class="dept-body">
+    <p>{{ d.description }}</p>
+    <ul class="services">
+      @for (service of d.services; track service) {
+        <li>{{ service }}</li>
+      }
+    </ul>
+
+    <div class="dept-foot">
+      <div class="team">
+        <span class="avatars">
+          @for (doc of d.doctors; track doc.name) {
+            <img [src]="doc.image" [alt]="doc.name" loading="lazy" />
+          }
+        </span>
+        <span>{{ d.doctors.length }} specialists</span>
+      </div>
+      <span class="go" aria-hidden="true"><mat-icon>arrow_forward</mat-icon></span>
+    </div>
+  </div>
+</a>

@@ -1,0 +1,126 @@
+<div class="page-shell">
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow">Hospital Management System</span>
+      <h1>Better care, <span>simplified.</span></h1>
+      <p>
+        Book appointments, manage patient records and connect with specialists, all from one
+        secure platform built for patients, doctors and administrators.
+      </p>
+      <div class="hero-actions">
+        <a mat-flat-button class="pill-button" routerLink="/signup">
+          <mat-icon>event_available</mat-icon>
+          Book an appointment
+        </a>
+        <a mat-stroked-button class="pill-button" routerLink="/departments">Our departments</a>
+      </div>
+      <div class="trust-row">
+        <span><mat-icon>verified_user</mat-icon> Secure records</span>
+        <span><mat-icon>schedule</mat-icon> 24/7 support</span>
+        <span><mat-icon>groups</mat-icon> Expert specialists</span>
+      </div>
+    </div>
+
+    <div class="booking-card">
+      <div class="booking-header">
+        <span>Quick booking</span>
+        <span class="booking-step">STEP 1 OF 3</span>
+      </div>
+
+      <div class="booking-field">
+        <span class="field-label">DEPARTMENT</span>
+        <span class="select-pill"><mat-icon>favorite</mat-icon> Cardiology</span>
+      </div>
+
+      <div class="booking-field">
+        <span class="field-label">AVAILABLE TIME</span>
+        <div class="time-row">
+          @for (slot of slots; track slot) {
+            <button
+              type="button"
+              class="time-slot"
+              [class.selected]="selectedSlot() === slot"
+              (click)="selectedSlot.set(slot)"
+            >
+              {{ slot }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="doctor-row">
+        <span class="doctor-avatar">SL</span>
+        <div class="doctor-meta">
+          <strong>Dr. Sarah Lee</strong>
+          <small>Senior Cardiologist</small>
+        </div>
+        <span class="status-dot">Available</span>
+      </div>
+
+      <a mat-flat-button class="pill-button full-width" routerLink="/login">
+        Continue to book at {{ selectedSlot() }}
+      </a>
+    </div>
+  </section>
+
+  <app-about-section id="about" />
+
+  <section class="section">
+    <div class="dept-teaser">
+      <div>
+        <span class="eyebrow">Our departments</span>
+        <h2>Specialized care, all under one roof</h2>
+        <p>Cardiology, neurology, orthopedics, pediatrics, emergency care and general medicine, led by experienced specialists.</p>
+      </div>
+      <a mat-flat-button class="pill-button" routerLink="/departments">
+        Explore departments
+        <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header centered">
+      <span class="eyebrow">One platform, three portals</span>
+      <h2>Built for everyone in the care journey</h2>
+    </div>
+    <div class="card-grid">
+      @for (role of roles; track role.title) {
+        <article class="info-card role-card">
+          <div class="icon-tile"><mat-icon>{{ role.icon }}</mat-icon></div>
+          <h3>{{ role.title }}</h3>
+          <p>{{ role.description }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header centered">
+      <span class="eyebrow">How it works</span>
+      <h2>Care in three simple steps</h2>
+    </div>
+    <div class="card-grid">
+      @for (step of steps; track step.number) {
+        <article class="info-card">
+          <span class="step-number">{{ step.number }}</span>
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.description }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="cta-band">
+      <div>
+        <h2>Ready to take charge of your health?</h2>
+        <p>Create your free account and book your first appointment today.</p>
+      </div>
+      <div class="cta-actions">
+        <a mat-flat-button class="pill-button cta-primary" routerLink="/signup">Sign up free</a>
+        <a mat-stroked-button class="pill-button cta-secondary" routerLink="/contact">Contact us</a>
+      </div>
+    </div>
+  </section>
+</div>

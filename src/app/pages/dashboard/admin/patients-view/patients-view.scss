@@ -1,0 +1,111 @@
+.search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--dash-line);
+  border-radius: 10px;
+  color: var(--mp-muted);
+
+  input {
+    width: 240px;
+    border: 0;
+    outline: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.85rem;
+  }
+  @media (max-width: 600px) {
+    width: 100%;
+
+    input {
+      width: 100%;
+    }
+  }
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--mp-ink-soft);
+}
+
+// A stronger line where each patient's group of rows begins.
+tr.group-start td {
+  border-top: 2px solid #d5dde7;
+}
+
+tbody tr:first-child td {
+  border-top: 0;
+}
+
+// Patient cells span the group's rows: sit at the top, on a light tint.
+td.patient {
+  vertical-align: top;
+  background: #fbfcfd;
+}
+
+.who {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  strong {
+    display: block;
+    color: var(--mp-ink);
+  }
+}
+
+td small {
+  display: block;
+  margin-top: 2px;
+  color: var(--mp-muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--dash-accent-soft);
+  color: var(--dash-accent);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.email a {
+  color: var(--dash-accent);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// The table makes the first column bold; the doctor column gets the same weight here.
+.doc {
+  color: var(--mp-ink) !important;
+  font-weight: 700;
+}
+
+.cap {
+  text-transform: capitalize;
+}
+
+.reason {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.none {
+  color: var(--mp-muted) !important;
+  font-weight: 500 !important;
+}

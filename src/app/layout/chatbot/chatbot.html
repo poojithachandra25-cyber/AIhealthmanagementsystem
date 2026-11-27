@@ -1,0 +1,60 @@
+@if (open()) {
+  <section class="panel" role="dialog" aria-label="MedPoint assistant chat">
+    <header class="head">
+      <span class="avatar"><mat-icon>support_agent</mat-icon></span>
+      <div class="title">
+        <strong>MedPoint assistant</strong>
+        <small>
+          <i class="dot" [class.basic]="mode() === 'basic'"></i>
+          {{ mode() === 'ai' ? 'AI assistant · answers from our hospital information' : mode() === 'basic' ? 'Basic mode · quick answers from our hospital information' : 'Online' }}
+        </small>
+      </div>
+      <button type="button" class="icon" (click)="reset()" aria-label="Start a new chat" title="New chat">
+        <mat-icon>refresh</mat-icon>
+      </button>
+      <button type="button" class="icon" (click)="open.set(false)" aria-label="Close chat">
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <div class="list" #list aria-live="polite">
+      @for (m of messages(); track $index) {
+        <div class="msg" [class.user]="m.role === 'user'" [class.error]="m.error">
+          <p>{{ m.content }}</p>
+        </div>
+      }
+      @if (sending()) {
+        <div class="msg typing" aria-label="Assistant is typing"><span></span><span></span><span></span></div>
+      }
+      @if (showSuggestions()) {
+        <div class="chips">
+          @for (s of suggestions; track s) {
+            <button type="button" (click)="send(s)" [disabled]="sending()">{{ s }}</button>
+          }
+        </div>
+      }
+    </div>
+
+    <form class="compose" (submit)="$event.preventDefault(); send()">
+      <textarea
+        #box
+        rows="1"
+        placeholder="Ask about doctors, fees, booking…"
+        aria-label="Your message"
+        [attr.maxlength]="maxChars"
+        [value]="draft()"
+        (input)="draft.set($any($event.target).value)"
+        (keydown)="onKeydown($event)"
+      ></textarea>
+      <button type="submit" class="send" [disabled]="!draft().trim() || sending()" aria-label="Send message">
+        <mat-icon>send</mat-icon>
+      </button>
+    </form>
+    <p class="note">For emergencies call +1 (800) 123-4567. The assistant doesn't give medical advice.</p>
+  </section>
+}
+
+<button type="button" class="fab" [class.open]="open()" (click)="toggle()" [attr.aria-expanded]="open()"
+  [attr.aria-label]="open() ? 'Close chat' : 'Chat with MedPoint assistant'">
+  <mat-icon>{{ open() ? 'close' : 'chat' }}</mat-icon>
+</button>

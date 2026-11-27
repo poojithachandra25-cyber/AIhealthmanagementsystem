@@ -1,0 +1,69 @@
+<section class="stats-strip" aria-label="MedPoint in numbers">
+  @for (stat of stats; track stat.label) {
+    <div class="stat">
+      <strong>{{ stat.value }}</strong>
+      <span>{{ stat.label }}</span>
+    </div>
+  }
+</section>
+
+<section class="section story">
+  <div class="story-visual">
+    <div class="visual-card dark">
+      <mat-icon>local_hospital</mat-icon>
+      <strong>Mission</strong>
+      <p>Deliver safe, timely and compassionate care to every patient who walks through our doors.</p>
+    </div>
+    <div class="visual-card light">
+      <mat-icon>visibility</mat-icon>
+      <strong>Vision</strong>
+      <p>A connected healthcare experience where patients and doctors work together seamlessly.</p>
+    </div>
+  </div>
+  <div class="story-copy">
+    <span class="eyebrow">About us</span>
+    <h2>Caring for our community since 1998</h2>
+    <p>
+      What started as a small community clinic has grown into a multi-specialty hospital. Our
+      hospital management system brings patients, doctors and administrators onto one platform,
+      so every visit is faster, every record is accurate and every decision is better informed.
+    </p>
+    <ul>
+      <li><mat-icon>check_circle</mat-icon> Online appointment booking</li>
+      <li><mat-icon>check_circle</mat-icon> Digital patient records</li>
+      <li><mat-icon>check_circle</mat-icon> Nationally accredited specialists</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-header centered">
+    <span class="eyebrow">Our values</span>
+    <h2>What guides us every day</h2>
+  </div>
+  <div class="card-grid">
+    @for (value of values; track value.title) {
+      <article class="info-card">
+        <div class="icon-tile"><mat-icon>{{ value.icon }}</mat-icon></div>
+        <h3>{{ value.title }}</h3>
+        <p>{{ value.description }}</p>
+      </article>
+    }
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-header centered">
+    <span class="eyebrow">Leadership</span>
+    <h2>Meet the people behind MedPoint</h2>
+  </div>
+  <div class="team-grid">
+    @for (leader of leaders; track leader.name) {
+      <article class="info-card team-card">
+        <span class="avatar">{{ leader.initials }}</span>
+        <h3>{{ leader.name }}</h3>
+        <p>{{ leader.role }}</p>
+      </article>
+    }
+  </div>
+</section>

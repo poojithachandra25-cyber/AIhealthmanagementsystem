@@ -1,0 +1,87 @@
+@if (department(); as dept) {
+  <div class="page-shell" [style]="accentVars(dept)">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a routerLink="/">Home</a>
+      <mat-icon>chevron_right</mat-icon>
+      <a routerLink="/departments">Our Departments</a>
+      <mat-icon>chevron_right</mat-icon>
+      <span>{{ dept.title }}</span>
+    </nav>
+
+    <section class="hero">
+      <span class="ring ring-1"></span>
+      <span class="ring ring-2"></span>
+
+      <div class="hero-copy">
+        <span class="hero-icon"><mat-icon>{{ dept.icon }}</mat-icon></span>
+        <span class="kicker">{{ dept.hours }} · {{ dept.doctors.length }} specialists</span>
+        <h1>{{ dept.title }}</h1>
+        <p class="tagline">{{ dept.tagline }}</p>
+        <p class="desc">{{ dept.description }}</p>
+        <ul class="services">
+          @for (service of dept.services; track service) {
+            <li><mat-icon>check_circle</mat-icon>{{ service }}</li>
+          }
+        </ul>
+        <a mat-flat-button class="pill-button hero-cta" href="#doctors">
+          <mat-icon>groups</mat-icon>
+          Meet our specialists
+        </a>
+      </div>
+
+      <dl class="highlights">
+        @for (h of dept.highlights; track h.label) {
+          <div>
+            <dd>{{ h.value }}</dd>
+            <dt>{{ h.label }}</dt>
+          </div>
+        }
+      </dl>
+    </section>
+
+    <section class="section" id="doctors">
+      <div class="section-header">
+        <div>
+          <span class="eyebrow accent">Our specialists</span>
+          <h2>Meet the {{ dept.title }} team</h2>
+        </div>
+        <p>Board-certified experts who combine clinical excellence with genuine compassion.</p>
+      </div>
+
+      <div class="doctor-list">
+        @for (doctor of dept.doctors; track doctor.name) {
+          <app-doctor-card [doctor]="doctor" [department]="dept.title" />
+        }
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <h2>Explore other departments</h2>
+        <a mat-button routerLink="/departments">
+          View all <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </a>
+      </div>
+      <div class="others">
+        @for (other of others(); track other.slug) {
+          <a class="other" [routerLink]="['/departments', other.slug]" [style]="accentVars(other)">
+            <span class="other-icon"><mat-icon>{{ other.icon }}</mat-icon></span>
+            <span>
+              <strong>{{ other.title }}</strong>
+              <small>{{ other.doctors.length }} specialists</small>
+            </span>
+          </a>
+        }
+      </div>
+    </section>
+  </div>
+} @else {
+  <div class="page-shell">
+    <section class="page-banner not-found">
+      <mat-icon>search_off</mat-icon>
+      <h1>Department not found</h1>
+      <p>The department you're looking for doesn't exist or may have moved.</p>
+      <a mat-flat-button class="pill-button" routerLink="/departments">Browse departments</a>
+    </section>
+  </div>
+}

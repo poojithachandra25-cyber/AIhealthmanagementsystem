@@ -1,0 +1,136 @@
+:host {
+  position: relative;
+  display: inline-block;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 10px 8px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #3a465a;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+
+  &:hover {
+    color: #1d7ef7;
+  }
+
+  &.active {
+    color: #1d6fe0;
+    background: #e3eeff;
+  }
+}
+
+.chevron {
+  transition: transform 0.2s ease;
+
+  &.open {
+    transform: rotate(180deg);
+  }
+}
+
+/* padding-top bridges the gap between trigger and card so hover isn't lost. */
+.panel {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  z-index: 10;
+  width: min(640px, 90vw);
+  padding-top: 14px;
+  transform: translateX(-50%);
+  animation: drop-in 0.18s ease-out;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 14px 0 0;
+    z-index: -1;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 24px 50px rgba(17, 31, 45, 0.16);
+  }
+}
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 14px 14px 6px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  text-decoration: none;
+
+  strong,
+  small {
+    display: block;
+  }
+
+  strong {
+    color: var(--mp-ink);
+    font-size: 0.92rem;
+  }
+
+  small {
+    color: var(--mp-muted);
+    font-size: 0.75rem;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: #f1f6ff;
+    outline: none;
+  }
+}
+
+.item-icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: #fff;
+}
+
+.view-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 14px 14px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f1f6ff;
+  color: #1d6fe0;
+  font-weight: 700;
+  text-decoration: none;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -6px);
+  }
+}

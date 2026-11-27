@@ -1,0 +1,147 @@
+.summary {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--dash-accent-soft);
+  color: var(--dash-accent);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.slot-len {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  > span {
+    color: var(--mp-ink-soft);
+    font-size: 0.84rem;
+    font-weight: 700;
+  }
+}
+
+.days {
+  display: grid;
+  gap: 8px;
+}
+
+.day {
+  display: grid;
+  grid-template-columns: 170px 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 6px 14px;
+  border: 1px solid var(--dash-line);
+  border-radius: 12px;
+
+  &.off {
+    background: var(--dash-bg);
+  }
+  &.bad {
+    border-color: #fca5a5;
+  }
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr auto;
+
+    .hours {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+
+  input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--dash-accent);
+  }
+  .name {
+    font-weight: 800;
+  }
+}
+
+.hours {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  span {
+    color: var(--mp-muted);
+    font-size: 0.8rem;
+  }
+  select {
+    height: 36px;
+    padding: 0 8px;
+    border: 1px solid #d5dde7;
+    border-radius: 9px;
+    background: #fff;
+    font: inherit;
+    font-size: 0.84rem;
+  }
+}
+
+.count {
+  color: var(--mp-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.closed {
+  color: var(--mp-muted);
+  font-size: 0.82rem;
+}
+
+.copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: none;
+  color: var(--dash-accent);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+  }
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0 0;
+  color: #b91c1c;
+  font-size: 0.84rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--dash-line);
+
+  small {
+    margin-right: auto;
+    color: var(--mp-muted);
+    font-size: 0.76rem;
+  }
+  mat-spinner {
+    margin: 0 auto;
+  }
+}

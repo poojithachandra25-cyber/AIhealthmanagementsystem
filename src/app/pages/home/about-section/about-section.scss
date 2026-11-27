@@ -1,0 +1,151 @@
+:host {
+  display: block;
+  scroll-margin-top: 110px;
+}
+
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding: 56px 10px 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 22px 12px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 18px 36px rgba(20, 33, 54, 0.08);
+
+  strong {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    color: var(--mp-blue-deep);
+  }
+
+  span {
+    color: var(--mp-ink-soft);
+    font-size: 0.9rem;
+  }
+}
+
+.story {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.story-visual {
+  display: grid;
+  gap: 18px;
+}
+
+.visual-card {
+  max-width: 440px;
+  padding: 26px 24px;
+  border-radius: 24px;
+  box-shadow: 0 20px 35px rgba(22, 34, 54, 0.1);
+
+  strong {
+    display: block;
+    margin: 10px 0 6px;
+    font-size: 1.3rem;
+  }
+
+  p {
+    margin: 0;
+    line-height: 1.7;
+    opacity: 0.9;
+  }
+
+  &.dark {
+    background: var(--mp-navy);
+    color: #fff;
+  }
+
+  &.light {
+    margin-left: 50px;
+    background: #e9f5ed;
+    color: #123326;
+  }
+}
+
+.story-copy {
+  h2 {
+    margin: 0 0 18px;
+    font-size: clamp(2rem, 3vw, 2.8rem);
+    line-height: 1.15;
+    letter-spacing: -0.05em;
+  }
+
+  p {
+    color: var(--mp-ink-soft);
+    line-height: 1.8;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 22px 0 0;
+    display: grid;
+    gap: 12px;
+    font-weight: 600;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    mat-icon {
+      color: var(--mp-blue);
+    }
+  }
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.team-card {
+  text-align: center;
+}
+
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d9edff, #bfd5ff);
+  color: #183d69;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+@media (max-width: 1024px) {
+  .story {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-strip,
+  .team-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .visual-card.light {
+    margin-left: 0;
+  }
+}

@@ -1,0 +1,157 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr);
+  gap: 18px;
+  align-items: start;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.side,
+.main {
+  display: grid;
+  gap: 18px;
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--mp-ink-soft);
+}
+
+.card {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  border-top: 4px solid var(--accent-1);
+  text-align: center;
+
+  img,
+  .photo {
+    width: 96px;
+    height: 96px;
+    margin-bottom: 10px;
+    border-radius: 24px;
+    object-fit: cover;
+  }
+  .photo {
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    font-size: 1.6rem;
+    font-weight: 800;
+  }
+  h2 {
+    margin: 2px 0 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+  }
+  small {
+    color: var(--mp-muted);
+  }
+}
+
+.dept {
+  color: var(--accent-1);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.facts {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 14px;
+
+  div {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 8px;
+  }
+  dt {
+    color: var(--mp-muted);
+    font-size: 0.78rem;
+  }
+  dd {
+    margin: 0;
+    font-size: 0.84rem;
+    font-weight: 700;
+  }
+}
+
+.label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--mp-ink-soft);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+
+  span {
+    padding: 5px 0;
+    border-radius: 7px;
+    background: var(--dash-bg);
+    color: #a5b0bd;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-align: center;
+  }
+  .on {
+    background: var(--dash-accent);
+    color: #fff;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 14px;
+
+  &.three {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .wide {
+    grid-column: 1 / -1;
+  }
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--dash-line);
+
+  mat-spinner {
+    margin: 0 auto;
+  }
+}
+
+.mismatch {
+  color: #b91c1c;
+}

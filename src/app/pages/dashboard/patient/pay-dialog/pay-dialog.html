@@ -1,0 +1,139 @@
+<header class="head">
+  <div>
+    <span class="secure"><mat-icon>lock</mat-icon> Secure checkout · Demo</span>
+    <h2 mat-dialog-title>Complete your payment</h2>
+    <p>{{ bill().doctor }} · {{ bill().department }} · {{ when }}</p>
+  </div>
+  <button mat-icon-button aria-label="Close" [disabled]="paying()" (click)="close()">
+    <mat-icon>close</mat-icon>
+  </button>
+</header>
+
+<mat-dialog-content>
+  <section class="summary" aria-label="Bill summary">
+    <div>
+      <span>{{ bill().type === 'emergency' ? 'Emergency' : 'Regular' }} consultation</span>
+      <strong>{{ money(bill().fee) }}</strong>
+    </div>
+    <div>
+      <span>GST ({{ bill().gstRate }}%)</span>
+      <strong>{{ money(bill().gst) }}</strong>
+    </div>
+    <div class="total">
+      <span>Total payable</span>
+      <strong>{{ money(bill().total) }}</strong>
+    </div>
+    <small>Invoice {{ bill().invoiceNo }}</small>
+  </section>
+
+  @switch (outcome()) {
+    @case ('paid') {
+      <section class="result ok" role="status">
+        <span class="icon"><mat-icon>check_circle</mat-icon></span>
+        <h3>Payment successful</h3>
+        <p>{{ money(bill().total) }} paid with {{ bill().methodDetail }}.</p>
+        <small>Transaction ID {{ bill().transactionId }}</small>
+      </section>
+    }
+    @case ('failed') {
+      <section class="result fail" role="alert">
+        <span class="icon"><mat-icon>error</mat-icon></span>
+        <h3>Payment failed</h3>
+        <p>{{ bill().failureReason }}</p>
+        <small>Nothing was charged. You can try again with another method.</small>
+      </section>
+    }
+    @default {
+      <mat-button-toggle-group
+        class="methods"
+        [value]="method()"
+        (change)="method.set($event.value); error.set('')"
+        aria-label="Payment method"
+      >
+        <mat-button-toggle value="card"><mat-icon>credit_card</mat-icon>Card</mat-button-toggle>
+        <mat-button-toggle value="upi"><mat-icon>qr_code_2</mat-icon>UPI</mat-button-toggle>
+        <mat-button-toggle value="netbanking"><mat-icon>account_balance</mat-icon>Net banking</mat-button-toggle>
+      </mat-button-toggle-group>
+
+      <form class="fields" (submit)="$event.preventDefault(); pay()">
+        @switch (method()) {
+          @case ('card') {
+            <mat-form-field appearance="outline" class="wide" subscriptSizing="dynamic">
+              <mat-label>Name on card</mat-label>
+              <input matInput autocomplete="cc-name" [value]="card.name()" (input)="card.name.set($any($event.target).value)" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="wide" subscriptSizing="dynamic">
+              <mat-label>Card number</mat-label>
+              <input matInput inputmode="numeric" autocomplete="cc-number" placeholder="4242 4242 4242 4242"
+                [value]="card.number()" (input)="formatCard($any($event.target).value)" />
+              <mat-icon matSuffix>credit_card</mat-icon>
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Expiry (MM/YY)</mat-label>
+              <input matInput inputmode="numeric" autocomplete="cc-exp" placeholder="12/30"
+                [value]="card.expiry()" (input)="formatExpiry($any($event.target).value)" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>CVV</mat-label>
+              <input matInput type="password" inputmode="numeric" maxlength="4" autocomplete="cc-csc"
+                [value]="card.cvv()" (input)="card.cvv.set($any($event.target).value)" />
+            </mat-form-field>
+          }
+          @case ('upi') {
+            <mat-form-field appearance="outline" class="wide" subscriptSizing="dynamic">
+              <mat-label>UPI ID</mat-label>
+              <input matInput placeholder="name@okbank" [value]="vpa()" (input)="vpa.set($any($event.target).value)" />
+              <mat-icon matSuffix>alternate_email</mat-icon>
+            </mat-form-field>
+          }
+          @default {
+            <mat-form-field appearance="outline" class="wide" subscriptSizing="dynamic">
+              <mat-label>Choose your bank</mat-label>
+              <mat-select [value]="bank()" (selectionChange)="bank.set($event.value)">
+                @for (b of banks(); track b.code) {
+                  <mat-option [value]="b.code">{{ b.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+        }
+        <button type="submit" class="hidden-submit" tabindex="-1" aria-hidden="true"></button>
+      </form>
+
+      @if (error()) {
+        <p class="error" role="alert"><mat-icon>error_outline</mat-icon>{{ error() }}</p>
+      }
+
+      <details class="test-values">
+        <summary><mat-icon>science</mat-icon> Demo payment: test values</summary>
+        <ul>
+          <li><strong>Success:</strong> card <code>4242 4242 4242 4242</code>, any future expiry, any CVV · any UPI ID · any real bank</li>
+          <li><strong>Failure:</strong> card <code>4000 0000 0000 0002</code> (declined) or <code>4000 0000 0000 9995</code> (insufficient funds) · UPI <code>fail&#64;upi</code> · "Test Bank"</li>
+        </ul>
+      </details>
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @switch (outcome()) {
+    @case ('paid') {
+      <button mat-stroked-button (click)="invoice()"><mat-icon>download</mat-icon>Invoice</button>
+      <button mat-flat-button (click)="close()">Done</button>
+    }
+    @case ('failed') {
+      <button mat-button (click)="close()">Pay later</button>
+      <button mat-flat-button (click)="retry()">Try again</button>
+    }
+    @default {
+      <button mat-button [disabled]="paying()" (click)="close()">Pay later</button>
+      <button mat-flat-button class="pay" [disabled]="paying()" (click)="pay()">
+        @if (paying()) {
+          <mat-spinner diameter="18" />
+        } @else {
+          <ng-container><mat-icon>lock</mat-icon> {{ payLabel() }}</ng-container>
+        }
+      </button>
+    }
+  }
+</mat-dialog-actions>

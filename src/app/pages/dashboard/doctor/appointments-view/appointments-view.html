@@ -1,0 +1,93 @@
+<div class="dash-card">
+  <div class="dash-card-head">
+    <div>
+      <h2>My appointments</h2>
+      <small>View a patient's history, or Update to record the visit and write the prescription.</small>
+    </div>
+  </div>
+
+  @if (store.needOutcome().length) {
+    <p class="alert">
+      <mat-icon>pending_actions</mat-icon>
+      {{ store.needOutcome().length }} past visit{{ store.needOutcome().length === 1 ? '' : 's' }}
+      still confirmed. Use Update to mark them completed or missed.
+    </p>
+  }
+
+  <div class="toolbar">
+    <div class="segmented" role="tablist" aria-label="Filter appointments">
+      @for (t of tabs(); track t.id) {
+        <button type="button" role="tab" [class.active]="tab() === t.id" (click)="tab.set(t.id)">
+          {{ t.label }} ({{ t.count }})
+        </button>
+      }
+    </div>
+    <label class="search">
+      <mat-icon>search</mat-icon>
+      <input
+        type="search"
+        placeholder="Search patient or reason"
+        aria-label="Search appointments"
+        [value]="query()"
+        (input)="query.set($any($event.target).value)"
+      />
+    </label>
+  </div>
+
+  <div class="dash-table-wrap">
+    <table class="dash-table">
+      <thead>
+        <tr>
+          <th>Patient</th>
+          <th>Date &amp; time</th>
+          <th>Type</th>
+          <th>Reason</th>
+          <th>Status</th>
+          <th>Payment</th>
+          <th><span class="sr-only">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (a of shown(); track a.id) {
+          <tr [class.flag]="needsOutcome(a)">
+            <td>
+              <div class="who">
+                <span class="avatar">{{ initials(a.patient) }}</span>
+                <div>
+                  <strong>{{ a.patient }}</strong>
+                  <small>{{ patientMeta(a.patientDob, a.patientGender) || a.patientEmail }}</small>
+                </div>
+              </div>
+            </td>
+            <td>{{ fullDate(a.date) }} · {{ timeLabel(a.time) }}</td>
+            <td><span class="type" [class.emergency]="a.type === 'emergency'">{{ a.type }}</span></td>
+            <td class="reason" [title]="a.reason ?? ''">{{ a.reason || '—' }}</td>
+            <td>
+              <span class="status-pill" [class]="a.status">{{ a.status }}</span>
+              @if (a.hasConsultation) {
+                <small class="rx"><mat-icon>medication</mat-icon>Prescribed</small>
+              }
+            </td>
+            <td>
+              @if (a.billStatus) {
+                <span class="status-pill" [class]="billMeta[a.billStatus].css">{{ billMeta[a.billStatus].label }}</span>
+              } @else { — }
+            </td>
+            <td>
+              <div class="actions">
+                <button type="button" (click)="store.openCase(a.id, 'view')">
+                  <mat-icon>visibility</mat-icon>View
+                </button>
+                <button type="button" class="update" [disabled]="a.status === 'cancelled'" (click)="store.openCase(a.id, 'update')">
+                  <mat-icon>edit_note</mat-icon>Update
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="empty">No appointments here.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
